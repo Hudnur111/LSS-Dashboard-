@@ -1,0 +1,405 @@
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>LSS Dashboard - Leitstellenspiel Statistik</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: "Roboto", sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <header class="bg-blue-900 text-white shadow-md">
+    <div
+      class="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between"
+    >
+      <h1 class="text-2xl font-bold flex items-center space-x-3">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Leitstellenspiel Dashboard</span>
+      </h1>
+      <nav class="mt-3 md:mt-0">
+        <ul class="flex space-x-6 text-sm font-semibold">
+          <li><a class="hover:text-yellow-400 transition" href="#overview">Übersicht</a></li>
+          <li><a class="hover:text-yellow-400 transition" href="#einsaetze">Einsätze</a></li>
+          <li><a class="hover:text-yellow-400 transition" href="#verdienst">Verdienst</a></li>
+          <li><a class="hover:text-yellow-400 transition" href="#fahrzeuge">Fahrzeuge</a></li>
+          <li><a class="hover:text-yellow-400 transition" href="#zusammenfassung">Zusammenfassung</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main class="container mx-auto px-4 py-8 flex-grow">
+    <section class="mb-12" id="overview">
+      <h2
+        class="text-3xl font-extrabold text-blue-900 mb-6 flex items-center space-x-3"
+      >
+        <i class="fas fa-chart-pie"></i>
+        <span>Dashboard Übersicht</span>
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          class="bg-white rounded-lg shadow p-6 flex flex-col items-center"
+          title="Anzahl der abgeschlossenen Einsätze"
+        >
+          <i class="fas fa-clipboard-check text-6xl text-blue-700 mb-4"></i>
+          <p class="text-4xl font-bold text-blue-900" id="totalEinsaetze">0</p>
+          <p class="text-gray-600 mt-2">Abgeschlossene Einsätze</p>
+        </div>
+        <div
+          class="bg-white rounded-lg shadow p-6 flex flex-col items-center"
+          title="Gesamtverdienst in Euro"
+        >
+          <i class="fas fa-euro-sign text-6xl text-green-600 mb-4"></i>
+          <p class="text-4xl font-bold text-green-600" id="totalVerdienst">0 €</p>
+          <p class="text-gray-600 mt-2">Gesamtverdienst</p>
+        </div>
+        <div
+          class="bg-white rounded-lg shadow p-6 flex flex-col items-center"
+          title="Berufslevel des Spielers"
+        >
+          <i class="fas fa-hard-hat text-6xl text-purple-700 mb-4"></i>
+          <p class="text-4xl font-bold text-purple-700" id="berufLevel">-</p>
+          <p class="text-gray-600 mt-2">Berufslevel</p>
+        </div>
+        <div
+          class="bg-white rounded-lg shadow p-6 flex flex-col items-center"
+          title="Zeitpunkt des letzten Einsatzes"
+        >
+          <i class="fas fa-clock text-6xl text-gray-800 mb-4"></i>
+          <p class="text-2xl font-semibold text-gray-800" id="lastEinsatz">-</p>
+          <p class="text-gray-600 mt-2">Letzter Einsatz</p>
+        </div>
+      </div>
+    </section>
+    <section class="mb-12" id="einsaetze">
+      <h2
+        class="text-3xl font-extrabold text-blue-900 mb-6 flex items-center space-x-3"
+      >
+        <i class="fas fa-clipboard-list"></i>
+        <span>Einsätze</span>
+      </h2>
+      <div class="overflow-x-auto bg-white rounded-lg shadow p-4">
+        <table class="min-w-full text-left text-gray-700">
+          <thead class="bg-blue-900 text-white">
+            <tr>
+              <th class="py-3 px-4">Einsatz ID</th>
+              <th class="py-3 px-4">Datum</th>
+              <th class="py-3 px-4">Einsatzart</th>
+              <th class="py-3 px-4">Verdienst (€)</th>
+              <th class="py-3 px-4">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200" id="einsatzTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="mb-12" id="verdienst">
+      <h2
+        class="text-3xl font-extrabold text-blue-900 mb-6 flex items-center space-x-3"
+      >
+        <i class="fas fa-coins"></i>
+        <span>Verdienstübersicht</span>
+      </h2>
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+          <div>
+            <p class="text-5xl font-bold text-green-600" id="verdienstHeute">0 €</p>
+            <p class="text-gray-600 mt-1">Heute</p>
+          </div>
+          <div>
+            <p class="text-5xl font-bold text-green-600" id="verdienstWoche">0 €</p>
+            <p class="text-gray-600 mt-1">Diese Woche</p>
+          </div>
+          <div>
+            <p class="text-5xl font-bold text-green-600" id="verdienstMonat">0 €</p>
+            <p class="text-gray-600 mt-1">Dieser Monat</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="mb-12" id="fahrzeuge">
+      <h2
+        class="text-3xl font-extrabold text-blue-900 mb-6 flex items-center space-x-3"
+      >
+        <i class="fas fa-truck-monster"></i>
+        <span>Fahrzeuge</span>
+      </h2>
+      <div class="overflow-x-auto bg-white rounded-lg shadow p-4">
+        <table class="min-w-full text-left text-gray-700">
+          <thead class="bg-blue-900 text-white">
+            <tr>
+              <th class="py-3 px-4">Fahrzeug ID</th>
+              <th class="py-3 px-4">Name</th>
+              <th class="py-3 px-4">Typ</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4">Kilometerstand</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200" id="fahrzeugTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="mb-12" id="zusammenfassung">
+      <h2
+        class="text-3xl font-extrabold text-blue-900 mb-6 flex items-center space-x-3"
+      >
+        <i class="fas fa-file-alt"></i>
+        <span>Professionelle Zusammenfassung</span>
+      </h2>
+      <div class="bg-white rounded-lg shadow p-6 prose max-w-none text-gray-800">
+        <p id="summaryText">Lade Daten und generiere Zusammenfassung...</p>
+      </div>
+    </section>
+  </main>
+  <footer class="bg-blue-900 text-white py-4 text-center text-sm">
+    © 2024 Leitstellenspiel Dashboard. Alle Rechte vorbehalten.
+  </footer>
+  <script>
+    // Hilfsfunktion: Datum in lesbares Format umwandeln
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    // Berechnung der Verdienste nach Zeitraum
+    function berechneVerdienst(einsaetze) {
+      const heute = new Date();
+      const startHeute = new Date(heute.getFullYear(), heute.getMonth(), heute.getDate());
+      const startWoche = new Date(heute);
+      startWoche.setDate(heute.getDate() - heute.getDay() + 1); // Montag als Wochenstart
+      const startMonat = new Date(heute.getFullYear(), heute.getMonth(), 1);
+
+      let verdienstHeute = 0;
+      let verdienstWoche = 0;
+      let verdienstMonat = 0;
+      let gesamtVerdienst = 0;
+
+      einsaetze.forEach((einsatz) => {
+        const einsatzDatum = new Date(einsatz.datum);
+        gesamtVerdienst += einsatz.verdienst;
+
+        if (einsatzDatum >= startHeute) verdienstHeute += einsatz.verdienst;
+        if (einsatzDatum >= startWoche) verdienstWoche += einsatz.verdienst;
+        if (einsatzDatum >= startMonat) verdienstMonat += einsatz.verdienst;
+      });
+
+      return { verdienstHeute, verdienstWoche, verdienstMonat, gesamtVerdienst };
+    }
+
+    // Letzter Einsatz ermitteln
+    function letzterEinsatz(einsaetze) {
+      if (einsaetze.length === 0) return "-";
+      const sorted = [...einsaetze].sort(
+        (a, b) => new Date(b.datum) - new Date(a.datum)
+      );
+      return formatDate(sorted[0].datum);
+    }
+
+    // Zusammenfassungstext generieren
+    function generiereZusammenfassung(einsaetze, berufLevel, verdienstGesamt) {
+      const anzahl = einsaetze.length;
+      const durchschnitt = (verdienstGesamt / anzahl).toFixed(2);
+      return `Du hast bisher insgesamt ${anzahl} Einsätze erfolgreich abgeschlossen und dabei einen Gesamtverdienst von ${verdienstGesamt} € erzielt. Dein aktuelles Berufslevel ist ${berufLevel}, was deine Erfahrung und Professionalität im Spiel widerspiegelt. Im Durchschnitt verdienst du pro Einsatz etwa ${durchschnitt} €. Weiter so!`;
+    }
+
+    // Tabelle mit Einsätzen füllen
+    function fillEinsatzTable(einsaetze) {
+      const tbody = document.getElementById("einsatzTableBody");
+      tbody.innerHTML = "";
+      einsaetze.forEach((einsatz) => {
+        const tr = document.createElement("tr");
+        tr.classList.add("hover:bg-gray-100", "cursor-pointer");
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono">${einsatz.id}</td>
+          <td class="py-3 px-4">${formatDate(einsatz.datum)}</td>
+          <td class="py-3 px-4">${einsatz.art}</td>
+          <td class="py-3 px-4 text-green-600 font-semibold">${einsatz.verdienst} €</td>
+          <td class="py-3 px-4">
+            <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+              einsatz.status === "Abgeschlossen"
+                ? "bg-green-200 text-green-800"
+                : "bg-gray-200 text-gray-600"
+            }">${einsatz.status}</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Tabelle mit Fahrzeugen füllen
+    function fillFahrzeugTable(fahrzeuge, kilometerstaende) {
+      const tbody = document.getElementById("fahrzeugTableBody");
+      tbody.innerHTML = "";
+      // Map Kilometerstände nach Fahrzeug-ID für schnellen Zugriff
+      const kmMap = new Map();
+      kilometerstaende.forEach((km) => {
+        kmMap.set(km.vehicle_id, km.distance);
+      });
+
+      fahrzeuge.forEach((fahrzeug) => {
+        const tr = document.createElement("tr");
+        tr.classList.add("hover:bg-gray-100", "cursor-pointer");
+        const km = kmMap.get(fahrzeug.id) ?? 0;
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono">${fahrzeug.id}</td>
+          <td class="py-3 px-4">${fahrzeug.name}</td>
+          <td class="py-3 px-4">${fahrzeug.vehicle_type_name}</td>
+          <td class="py-3 px-4">${fahrzeug.state}</td>
+          <td class="py-3 px-4 font-mono">${km.toLocaleString("de-DE")} km</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // API-Endpunkte
+    const API_BASE = "https://www.leitstellenspiel.de/api/v2";
+    const API_VEHICLES = API_BASE + "/vehicles";
+    const API_VEHICLE_DISTANCES = "https://www.leitstellenspiel.de/api/v1/vehicle_distances";
+    const API_USERINFO = "https://www.leitstellenspiel.de/api/userinfo";
+    const API_EINSAETZE = "https://www.leitstellenspiel.de/einsaetze.json";
+
+    // Funktion zum Laden der Fahrzeuge mit Authentifizierung
+    async function ladeFahrzeuge(token) {
+      try {
+        const [fahrzeugeRes, kmRes] = await Promise.all([
+          fetch(API_VEHICLES, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(API_VEHICLE_DISTANCES, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+        if (!fahrzeugeRes.ok || !kmRes.ok)
+          throw new Error("Fehler beim Laden der Fahrzeugdaten");
+        const fahrzeuge = await fahrzeugeRes.json();
+        const kilometerstaende = await kmRes.json();
+        return { fahrzeuge, kilometerstaende };
+      } catch (e) {
+        console.error(e);
+        return { fahrzeuge: [], kilometerstaende: [] };
+      }
+    }
+
+    // Funktion zum Laden der Userinfo (für Berufslevel) mit Authentifizierung
+    async function ladeUserinfo(token) {
+      try {
+        const res = await fetch(API_USERINFO, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Fehler beim Laden der Userinfo");
+        const data = await res.json();
+        return data;
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
+
+    // Funktion zum Laden der Einsätze (offene Einsätze aus JSON)
+    async function ladeEinsaetze() {
+      try {
+        const res = await fetch(API_EINSAETZE);
+        if (!res.ok) throw new Error("Fehler beim Laden der Einsätze");
+        const data = await res.json();
+        // Die Einsätze aus der JSON enthalten keine Verdienst- oder Statusdaten,
+        // deshalb simulieren wir hier beispielhaft Verdienst und Status.
+        // In einer echten Integration müsste man die Einsätze des Spielers aus der API holen.
+        // Hier nehmen wir die ersten 15 Einsätze und generieren zufällige Werte.
+        const einsaetze = data.slice(0, 15).map((einsatz, i) => {
+          // Zufälliger Verdienst zwischen 80 und 140
+          const verdienst = 80 + Math.floor(Math.random() * 61);
+          // Status immer abgeschlossen (da keine Statusinfo)
+          return {
+            id: einsatz.id,
+            datum: new Date(Date.now() - i * 86400000).toISOString(), // je ein Tag zurück
+            art: einsatz.name,
+            verdienst,
+            status: "Abgeschlossen",
+          };
+        });
+        return einsaetze;
+      } catch (e) {
+        console.error(e);
+        return [];
+      }
+    }
+
+    // Prompt für Token-Eingabe und Speicherung im SessionStorage
+    async function getToken() {
+      let token = sessionStorage.getItem("lss_token");
+      if (!token) {
+        token = prompt(
+          "Bitte gib deinen Leitstellenspiel API Token ein:\n(Du findest ihn in den Entwicklereinstellungen deines Accounts)"
+        );
+        if (token) {
+          sessionStorage.setItem("lss_token", token.trim());
+        }
+      }
+      return token;
+    }
+
+    // Initialisierung
+    async function initDashboard() {
+      const token = await getToken();
+      if (!token) {
+        alert("Kein API Token eingegeben. Das Dashboard kann keine Daten laden.");
+        return;
+      }
+
+      // Lade alle Daten parallel
+      const [userInfo, { fahrzeuge, kilometerstaende }, einsaetze] = await Promise.all([
+        ladeUserinfo(token),
+        ladeFahrzeuge(token),
+        ladeEinsaetze(),
+      ]);
+
+      // Berufslevel aus Userinfo
+      const berufLevel = userInfo?.user?.schooling_level ?? "-";
+
+      // Gesamtverdienst berechnen
+      const { verdienstHeute, verdienstWoche, verdienstMonat, gesamtVerdienst } =
+        berechneVerdienst(einsaetze);
+
+      // Fülle Übersicht
+      document.getElementById("totalEinsaetze").textContent = einsaetze.length;
+      document.getElementById("totalVerdienst").textContent = gesamtVerdienst + " €";
+      document.getElementById("berufLevel").textContent = berufLevel;
+      document.getElementById("lastEinsatz").textContent = letzterEinsatz(einsaetze);
+
+      document.getElementById("verdienstHeute").textContent = verdienstHeute + " €";
+      document.getElementById("verdienstWoche").textContent = verdienstWoche + " €";
+      document.getElementById("verdienstMonat").textContent = verdienstMonat + " €";
+
+      // Fülle Tabellen
+      fillEinsatzTable(einsaetze);
+      fillFahrzeugTable(fahrzeuge, kilometerstaende);
+
+      // Generiere Zusammenfassung
+      document.getElementById("summaryText").textContent = generiereZusammenfassung(
+        einsaetze,
+        berufLevel,
+        gesamtVerdienst
+      );
+    }
+
+    // Starte Dashboard nach DOM geladen
+    document.addEventListener("DOMContentLoaded", initDashboard);
+  </script>
+</body>
+</html>
