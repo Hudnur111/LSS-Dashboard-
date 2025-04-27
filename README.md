@@ -46,4 +46,4 @@ Nähere Informationen findest du in der Lizenzdatei.
 
 ---
 
-> Made with ❤️ by [Dein Name oder Organisation]
+> Made with ❤️ by Hudnur111
