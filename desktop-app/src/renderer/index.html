@@ -73,6 +73,29 @@
           Der Token wird ausschließlich verschlüsselt über den OS-Schlüsselspeicher lokal
           abgelegt (siehe SECURITY.md) und nie an Dritte übertragen.
         </p>
+
+        <hr class="divider" />
+
+        <h2 class="section-subtitle">Tampermonkey-Bridge</h2>
+        <p class="hint">
+          Alternative, empfohlene Verbindung: Ein Tampermonkey-Skript läuft direkt in deinem
+          normalen, bereits eingeloggten Browser auf leitstellenspiel.de und sendet die Daten
+          lokal an diese App – kein eingebettetes Login-Fenster nötig. Installationsanleitung:
+          <code>desktop-app/tampermonkey/README.md</code>.
+        </p>
+        <div class="bridge-status">
+          <span id="bridgeStatusDot" class="status-dot"></span>
+          <span id="bridgeStatusText">Kein Kontakt</span>
+        </div>
+        <label for="bridgeTokenDisplay">Pairing-Token (im Tampermonkey-Menü hinterlegen)</label>
+        <div class="token-row">
+          <input id="bridgeTokenDisplay" type="text" readonly />
+          <button id="copyBridgeTokenBtn" class="ghost-btn" type="button">Kopieren</button>
+        </div>
+        <p class="hint">Lokaler Port: <span id="bridgePort">–</span></p>
+        <button id="regenerateBridgeTokenBtn" class="danger-btn" type="button">
+          Token neu generieren
+        </button>
       </section>
     </main>
   </div>

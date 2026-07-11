@@ -1,12 +1,14 @@
 'use strict';
 
 const { ipcMain } = require('electron');
-const { CHANNELS } = require('../shared/constants');
+const { CHANNELS, BRIDGE_PORT } = require('../shared/constants');
 const secureStore = require('./secure-store');
-const { buildSuggestions } = require('./aao-engine');
+const bridgeTokenStore = require('./bridge-token-store');
 const { fetchVehicles, fetchMissions } = require('./api-client');
+const hub = require('./game-data-hub');
 
 const POLL_INTERVAL_MS = 20_000;
+const BRIDGE_STATUS_INTERVAL_MS = 15_000;
 let pollTimer = null;
 
 async function pollOnce(dashboardWindow) {
@@ -15,12 +17,7 @@ async function pollOnce(dashboardWindow) {
 
   try {
     const [vehicles, missions] = await Promise.all([fetchVehicles(token), fetchMissions(token)]);
-    dashboardWindow.webContents.send(CHANNELS.TO_RENDERER.VEHICLE_UPDATE, vehicles);
-    dashboardWindow.webContents.send(CHANNELS.TO_RENDERER.GAME_DATA, { vehicles, missions });
-    dashboardWindow.webContents.send(
-      CHANNELS.TO_RENDERER.AAO_SUGGESTIONS,
-      buildSuggestions(vehicles, missions)
-    );
+    hub.publish(dashboardWindow, { vehicles, missions });
   } catch (err) {
     console.error('[lss-dashboard] Polling fehlgeschlagen:', err.message);
   }
@@ -47,6 +44,8 @@ function registerIpcHandlers(dashboardWindow) {
     CHANNELS.TOKEN_HAS,
     CHANNELS.GAME_VIEW_TOGGLE,
     CHANNELS.REFRESH_REQUEST,
+    CHANNELS.BRIDGE_TOKEN_GET,
+    CHANNELS.BRIDGE_TOKEN_REGENERATE,
   ]) {
     ipcMain.removeHandler(channel);
   }
@@ -78,11 +77,32 @@ function registerIpcHandlers(dashboardWindow) {
     return { ok: true };
   });
 
+  ipcMain.handle(CHANNELS.BRIDGE_TOKEN_GET, async () => ({
+    token: bridgeTokenStore.getOrCreateBridgeToken(),
+    port: BRIDGE_PORT,
+  }));
+
+  ipcMain.handle(CHANNELS.BRIDGE_TOKEN_REGENERATE, async () => {
+    const token = bridgeTokenStore.regenerateBridgeToken();
+    // Regenerating invalidates every already-paired browser tab immediately -
+    // surface that as a hard status reset instead of leaving the previous
+    // "connected" badge showing stale trust.
+    hub.sendBridgeStatus(dashboardWindow);
+    return { token };
+  });
+
   // Signal from the embedded game view's DOM observer (preload/game-preload.js):
   // don't trust the scraped payload itself, just use it to trigger an
   // immediate, authoritative poll against the official API.
   ipcMain.on(CHANNELS.GAME_RAW_EVENT, () => pollOnce(dashboardWindow));
   ipcMain.on(CHANNELS.GAME_VIEW_READY, () => {});
+
+  const bridgeStatusInterval = setInterval(
+    () => hub.sendBridgeStatus(dashboardWindow),
+    BRIDGE_STATUS_INTERVAL_MS
+  );
+  dashboardWindow.once('closed', () => clearInterval(bridgeStatusInterval));
+  hub.sendBridgeStatus(dashboardWindow);
 
   if (secureStore.hasToken()) startPolling(dashboardWindow);
 }

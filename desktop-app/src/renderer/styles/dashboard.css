@@ -170,3 +170,50 @@ nav {
 .settings-actions { display: flex; gap: 8px; margin-bottom: 16px; }
 
 .hint { color: var(--text-muted); font-size: 0.85rem; max-width: 480px; }
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+  max-width: 480px;
+}
+
+.section-subtitle { font-size: 1.1rem; margin: 0 0 8px; }
+
+.bridge-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--danger);
+  flex-shrink: 0;
+}
+
+.status-dot.online { background: var(--ok); }
+
+.token-row {
+  display: flex;
+  gap: 8px;
+  max-width: 480px;
+  margin-bottom: 8px;
+}
+
+.token-row #bridgeTokenDisplay {
+  flex-grow: 1;
+  margin-bottom: 0;
+  font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 0.85rem;
+}
+
+code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}

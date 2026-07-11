@@ -51,6 +51,33 @@ sie nie aus und speichert sie nie.
   Cookie-Store (OS-Dateiberechtigungen); sie sind bewusst getrennt von dem
   zusätzlich verschlüsselten API-Token.
 
+### Tampermonkey-Bridge (lokale HTTP-Schnittstelle)
+- Der Bridge-Server (`src/main/bridge-server.js`) bindet **ausschließlich** an
+  `127.0.0.1` – er ist nie über das lokale Netzwerk oder das Internet
+  erreichbar, unabhängig von Firewall-Konfiguration.
+- Jede eingehende `POST /ingest`-Anfrage muss ein Pairing-Token im Header
+  `X-Bridge-Token` mitschicken. Der Vergleich erfolgt über
+  `crypto.timingSafeEqual` statt `===`, um Seitenkanal-Timing-Angriffe zu
+  verhindern, mit denen ein anderer lokaler Prozess das Token Byte für Byte
+  erraten könnte.
+- Das Pairing-Token wird wie der API-Token verschlüsselt über `safeStorage`
+  abgelegt (`bridge-token-store.js`, `<userData>/secure/bridge-token.enc`)
+  und lässt sich in den Einstellungen jederzeit neu generieren – das macht
+  alle zuvor gepaarten Browser-Tabs sofort ungültig.
+- Die Antwort des Bridge-Servers enthält bewusst **keinen**
+  `Access-Control-Allow-Origin`-Header. Sie ist nur für `GM_xmlhttpRequest`
+  gedacht (das nicht CORS-Regeln unterliegt) – selbst wenn eine bösartige
+  Webseite Port und Token erraten würde, könnte ihr eigenes `fetch()` die
+  Antwort nicht auslesen.
+- Das Tampermonkey-Skript ist rein lesend: Es ruft nur GET-Endpunkte der
+  offiziellen API ab bzw. liest die Missionsliste im DOM. Es simuliert keine
+  Klicks, füllt keine Formulare aus und meldet niemals Fahrzeuge an – siehe
+  `ARCHITECTURE.md`, Abschnitt 4 (dieselbe bewusste Grenze wie die AAO-Engine).
+- Empfohlene Zusatzhärtung für produktive Nutzung: In Windows Defender
+  Firewall eine explizite Blockregel für eingehende Verbindungen zu diesem
+  Port von anderen Geräten anlegen (Loopback-Bindung macht das bereits
+  redundant, schadet aber nicht als zweite Verteidigungslinie).
+
 ### Netzwerk
 - Ausgehende API-Aufrufe laufen ausschließlich über HTTPS gegen die
   offizielle `leitstellenspiel.de`-Domain.

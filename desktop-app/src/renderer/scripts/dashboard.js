@@ -96,6 +96,32 @@ async function setupSettings() {
   });
 }
 
+async function setupBridgeSettings() {
+  const { token, port } = await window.lssAPI.getBridgeInfo();
+  qs('bridgeTokenDisplay').value = token;
+  qs('bridgePort').textContent = port;
+
+  qs('copyBridgeTokenBtn').addEventListener('click', () => {
+    window.lssAPI.copyText(qs('bridgeTokenDisplay').value);
+  });
+
+  qs('regenerateBridgeTokenBtn').addEventListener('click', async () => {
+    const confirmed = window.confirm(
+      'Neuen Token generieren? Bereits im Tampermonkey-Menü hinterlegte Tokens funktionieren danach nicht mehr, bis du sie dort aktualisierst.'
+    );
+    if (!confirmed) return;
+    const { token: newToken } = await window.lssAPI.regenerateBridgeToken();
+    qs('bridgeTokenDisplay').value = newToken;
+  });
+
+  window.lssAPI.onBridgeStatus(({ connected, lastSeenAt }) => {
+    qs('bridgeStatusDot').classList.toggle('online', connected);
+    qs('bridgeStatusText').textContent = connected
+      ? `Verbunden (zuletzt ${new Date(lastSeenAt).toLocaleTimeString('de-DE')})`
+      : 'Kein Kontakt';
+  });
+}
+
 function setupGameViewToggle() {
   let visible = false;
   qs('toggleGameView').addEventListener('click', async () => {
@@ -124,6 +150,7 @@ function subscribeToBackend() {
 window.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   setupSettings();
+  setupBridgeSettings();
   setupGameViewToggle();
   setupRefresh();
   subscribeToBackend();

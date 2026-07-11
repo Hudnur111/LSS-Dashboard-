@@ -3,9 +3,13 @@
 const { app, BrowserWindow, session } = require('electron');
 const { createDashboardWindow } = require('./src/main/windows');
 const { registerIpcHandlers } = require('./src/main/ipc');
+const { createBridgeServer } = require('./src/main/bridge-server');
+const bridgeTokenStore = require('./src/main/bridge-token-store');
+const gameDataHub = require('./src/main/game-data-hub');
 const { GAME_SESSION_PARTITION } = require('./src/shared/constants');
 
 let dashboardWindow = null;
+let bridgeServer = null;
 
 function hardenGameSession() {
   // The embedded game view runs in its own persistent session partition so the
@@ -21,9 +25,21 @@ function boot() {
   registerIpcHandlers(dashboardWindow);
 }
 
+// One local HTTP endpoint for the whole app lifetime, independent of window
+// creation/recreation - `dashboardWindow` is read through the closure at
+// ingest time, so it always targets whichever window currently exists.
+function startBridgeServer() {
+  if (bridgeServer) return;
+  bridgeServer = createBridgeServer({
+    getToken: bridgeTokenStore.getOrCreateBridgeToken,
+    onIngest: (payload) => gameDataHub.ingestFromBridge(dashboardWindow, payload),
+  });
+}
+
 app.whenReady().then(() => {
   hardenGameSession();
   boot();
+  startBridgeServer();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) boot();
@@ -32,6 +48,10 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('before-quit', () => {
+  if (bridgeServer) bridgeServer.close();
 });
 
 // Defense in depth: never let any renderer (dashboard or embedded game view)

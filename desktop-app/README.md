@@ -14,12 +14,25 @@ npm install
 npm start
 ```
 
-Beim ersten Start unter **Einstellungen** den persönlichen API-Bearer-Token
-hinterlegen (Leitstellenspiel → Account → Entwicklereinstellungen). Der Token
-wird ausschließlich verschlüsselt lokal gespeichert (siehe `SECURITY.md`).
+### Verbindung zum Spiel herstellen
 
-Über "Spiel-Ansicht einblenden" kann die echte Spielseite eingebettet
-angezeigt werden (eigene, persistente Login-Session).
+**Empfohlen: Tampermonkey-Bridge** – läuft in deinem normalen, bereits
+eingeloggten Browser statt in einem eingebetteten Login-Fenster. Anleitung:
+[`tampermonkey/README.md`](./tampermonkey/README.md). Kurzfassung:
+
+1. Tampermonkey-Skript installieren (`tampermonkey/lss-dashboard-bridge.user.js`).
+2. In der App unter **Einstellungen → Tampermonkey-Bridge** den Pairing-Token
+   kopieren, im Tampermonkey-Menü auf leitstellenspiel.de einfügen.
+
+**Alternativ: reines API-Token-Polling** – unter **Einstellungen** den
+persönlichen API-Bearer-Token hinterlegen (Leitstellenspiel → Account →
+Entwicklereinstellungen). Beide Wege speichern ihre Tokens ausschließlich
+verschlüsselt lokal (siehe `SECURITY.md`) und lassen sich unabhängig
+voneinander nutzen.
+
+Über "Spiel-Ansicht einblenden" kann zusätzlich die echte Spielseite optisch
+eingebettet angezeigt werden (eigene, persistente Login-Session) – das ist
+aber nur eine Sichtansicht, kein Datenweg.
 
 ## Build (Windows-Installer/Portable)
 
