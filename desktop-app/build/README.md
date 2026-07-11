@@ -1,0 +1,1 @@
+Place `icon.ico` (Windows), `icon.icns` (macOS) and `icon.png` (Linux, 512x512) here before running `npm run build`. electron-builder reads `icon.ico` per the `win.icon` setting in `electron-builder.yml`.

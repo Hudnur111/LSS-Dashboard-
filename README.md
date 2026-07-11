@@ -40,6 +40,16 @@ Die Installationsanleitung wird bereitgestellt, sobald die Grundfunktionen imple
 
 ---
 
+## 🖥️ Desktop-App (Electron)
+Neben dem Web-Prototyp (`index.html`) gibt es im Ordner [`desktop-app/`](./desktop-app) eine
+vollwertige Electron-Desktop-Anwendung mit Dark-Mode-Dashboard, Fahrzeug-Status,
+Einsatz-Monitoring, AAO-Alarmierungsvorschlägen und optionaler eingebetteter Spiel-Ansicht.
+Details zu Architektur, Sicherheitskonzept und Installation (inkl. `.bat`-Installer) siehe
+[`desktop-app/README.md`](./desktop-app/README.md), [`desktop-app/ARCHITECTURE.md`](./desktop-app/ARCHITECTURE.md)
+und [`desktop-app/SECURITY.md`](./desktop-app/SECURITY.md).
+
+---
+
 ## 📄 Lizenz
 Dieses Projekt steht unter der **[MIT-Lizenz](LICENSE)**.  
 Nähere Informationen findest du in der Lizenzdatei.

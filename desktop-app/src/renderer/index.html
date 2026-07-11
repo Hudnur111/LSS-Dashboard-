@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:;" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LSS Dashboard</title>
+  <link rel="stylesheet" href="styles/dashboard.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">🚨 LSS Dashboard</div>
+      <nav>
+        <button class="nav-item active" data-view="overview" type="button">Übersicht</button>
+        <button class="nav-item" data-view="vehicles" type="button">Fahrzeuge</button>
+        <button class="nav-item" data-view="aao" type="button">AAO-Vorschläge</button>
+        <button class="nav-item" data-view="settings" type="button">Einstellungen</button>
+      </nav>
+      <button id="toggleGameView" class="ghost-btn" type="button">Spiel-Ansicht einblenden</button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <h1 id="viewTitle">Übersicht</h1>
+        <button id="refreshBtn" class="ghost-btn" type="button">Aktualisieren</button>
+      </header>
+
+      <section id="view-overview" class="view">
+        <div class="widget-grid">
+          <div class="widget">
+            <span class="widget-label">Fahrzeuge gesamt</span>
+            <span class="widget-value" id="wVehicleCount">–</span>
+          </div>
+          <div class="widget">
+            <span class="widget-label">Frei auf Wache</span>
+            <span class="widget-value" id="wVehicleFree">–</span>
+          </div>
+          <div class="widget">
+            <span class="widget-label">Offene Einsätze</span>
+            <span class="widget-value" id="wOpenMissions">–</span>
+          </div>
+          <div class="widget">
+            <span class="widget-label">Vollständig alarmierbar</span>
+            <span class="widget-value" id="wFullyAlerted">–</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-vehicles" class="view hidden">
+        <table class="data-table">
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Typ</th><th>FMS-Status</th></tr>
+          </thead>
+          <tbody id="vehicleTableBody"></tbody>
+        </table>
+      </section>
+
+      <section id="view-aao" class="view hidden">
+        <div id="aaoList" class="aao-list"></div>
+      </section>
+
+      <section id="view-settings" class="view hidden">
+        <label for="tokenInput">API-Token</label>
+        <input id="tokenInput" type="password"
+               placeholder="Bearer-Token aus den Leitstellenspiel-Entwicklereinstellungen" />
+        <div class="settings-actions">
+          <button id="saveTokenBtn" type="button">Speichern</button>
+          <button id="clearTokenBtn" class="danger-btn" type="button">Entfernen</button>
+        </div>
+        <p class="hint">
+          Der Token wird ausschließlich verschlüsselt über den OS-Schlüsselspeicher lokal
+          abgelegt (siehe SECURITY.md) und nie an Dritte übertragen.
+        </p>
+      </section>
+    </main>
+  </div>
+  <script src="scripts/dashboard.js"></script>
+</body>
+</html>

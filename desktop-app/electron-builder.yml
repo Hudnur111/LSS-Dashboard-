@@ -1,0 +1,19 @@
+appId: de.lss-dashboard.desktop
+productName: LSS Dashboard
+directories:
+  output: dist
+files:
+  - main.js
+  - preload/**/*
+  - src/**/*
+  - package.json
+win:
+  target:
+    - nsis
+    - portable
+  icon: build/icon.ico
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true

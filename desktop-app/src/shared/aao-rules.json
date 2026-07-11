@@ -1,0 +1,10 @@
+{
+  "__comment__": "Beispiel-Regelwerk für AAO-Vorschläge. 'caption' muss exakt dem Einsatznamen aus der LSS-API entsprechen - gegen echte API-Antworten abgleichen und erweitern.",
+  "__default__": { "erforderlich": { "LF": 1 } },
+  "Kleiner Küchenbrand": { "erforderlich": { "LF": 1 } },
+  "Mülltonnenbrand": { "erforderlich": { "LF": 1 } },
+  "Wohnungsbrand": { "erforderlich": { "LF": 2, "DLK": 1, "RTW": 1 } },
+  "Verkehrsunfall": { "erforderlich": { "RW": 1, "RTW": 1 } },
+  "Person eingeklemmt": { "erforderlich": { "RW": 1, "LF": 1, "NEF": 1, "RTW": 1 } },
+  "Reanimation": { "erforderlich": { "RTW": 1, "NEF": 1 } }
+}
