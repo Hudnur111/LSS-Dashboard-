@@ -16,6 +16,7 @@
 | Storage (Session/API-Token/Bridge-Token) | `safeStorage` (Electron, OS-Schlüsselbund) | Siehe SECURITY.md. |
 | Packaging | `electron-builder` (NSIS + Portable) | Standard für professionelle Windows-Distribution, Code-Signing-fähig. |
 | Erst-Installation | `installer/install.bat` + `create-shortcut.ps1` | Einfache End-User-Experience für die portable Variante: kopiert nach `%LOCALAPPDATA%`, erstellt Verknüpfungen, startet die App. |
+| Erststart für Entwickler-Setup | `Start-Dashboard.bat` | Für Nutzer, die aus dem Quellordner starten statt einen fertigen Build zu installieren: prüft Node.js, führt `npm install`/`npm start` selbst aus – kein Terminal/keine Befehle nötig. Siehe Abschnitt 7. |
 
 ## 2. Prozess- und Modul-Struktur
 
@@ -140,3 +141,28 @@ aus dem Browser heraus, in dem der Spieler ohnehin schon eingeloggt ist.
 Der API-Token-Polling-Pfad (`ipc.js`/`api-client.js`) bleibt vollständig
 erhalten und funktioniert unabhängig von der Bridge – wer kein Tampermonkey
 nutzen möchte, kann weiterhin nur mit dem Bearer-Token arbeiten.
+
+## 7. UI-Politur: Demo-Modus, Benachrichtigungen, Animationen
+
+Rein clientseitig in `src/renderer/scripts/dashboard.js`/`dashboard.css`,
+ohne zusätzliche Abhängigkeiten:
+
+- **Demo-Modus**: Ist beim Start weder ein API-Token noch eine verbundene
+  Bridge vorhanden, lädt die App automatisch Beispieldaten (`DEMO_VEHICLES`/
+  `DEMO_MISSIONS`/`DEMO_SUGGESTIONS`) statt eines leeren Bildschirms, gut
+  sichtbar über ein Banner markiert. Sobald `game:data` vom Backend eintrifft,
+  wird der Demo-Modus automatisch beendet (`subscribeToBackend()`). Manuell
+  über Einstellungen → Demo-Modus jederzeit ein-/ausschaltbar.
+- **Toast-Benachrichtigungen** (`showToast()`): für Token gespeichert/entfernt,
+  Bridge verbunden/getrennt, neuer Einsatz erkannt, Token kopiert.
+- **AAO-Badge** in der Navigation: zeigt die Anzahl offener (nicht vollständig
+  alarmierbarer) Einsätze direkt neben "AAO-Vorschläge" an.
+- **Fahrzeug-Suche**: clientseitiger Filter über Name/Typ, keine Server-Anfrage.
+- **Zähl-Animation** (`animateCount()`) für die Übersichts-Widgets sowie
+  Skeleton-Loading-Zustand, bis die erste Datenlieferung eintrifft.
+- Reine CSS-Animationen für View-Wechsel, Status-Punkt-Puls, Karten-Hover –
+  alle über `prefers-reduced-motion` deaktivierbar (Barrierefreiheit).
+
+Bewusst nicht verwendet: keine Chart-/Animation-Bibliothek, kein CSS-Framework
+– konsistent mit der "keine CDN-Skripte, minimale Abhängigkeiten"-Entscheidung
+aus Abschnitt 1.

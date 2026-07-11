@@ -7,7 +7,22 @@ plus optionaler eingebetteter Spiel-Ansicht.
 Architektur- und Sicherheitsdetails: siehe [`ARCHITECTURE.md`](./ARCHITECTURE.md) und
 [`SECURITY.md`](./SECURITY.md).
 
-## Entwicklung
+## 🚀 Schnellstart (auch ohne Vorkenntnisse)
+
+Kein Terminal, keine Kommandozeile nötig:
+
+1. Falls noch nicht vorhanden: [Node.js](https://nodejs.org/de/download) installieren
+   (einmalig, wie jedes normale Windows-Programm – "LTS"-Version, alle Standardwerte
+   übernehmen).
+2. Doppelklick auf **[`Start-Dashboard.bat`](./Start-Dashboard.bat)**.
+
+Das war's. Beim allerersten Start richtet sich die App automatisch ein (einmalig,
+braucht eine Internetverbindung und ein paar Minuten); danach öffnet sie sich bei
+jedem weiteren Doppelklick sofort. Direkt nach dem Start zeigt das Dashboard
+Beispieldaten (Demo-Modus) – die eigene Spielverbindung wird separat unter
+"Verbindung zum Spiel herstellen" (siehe unten) eingerichtet.
+
+## Entwicklung (für Entwickler)
 
 ```bash
 npm install

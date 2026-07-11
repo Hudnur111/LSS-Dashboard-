@@ -43,7 +43,12 @@ Die Installationsanleitung wird bereitgestellt, sobald die Grundfunktionen imple
 ## 🖥️ Desktop-App (Electron)
 Neben dem Web-Prototyp (`index.html`) gibt es im Ordner [`desktop-app/`](./desktop-app) eine
 vollwertige Electron-Desktop-Anwendung mit Dark-Mode-Dashboard, Fahrzeug-Status,
-Einsatz-Monitoring, AAO-Alarmierungsvorschlägen und optionaler eingebetteter Spiel-Ansicht.
+Einsatz-Monitoring, AAO-Alarmierungsvorschlägen, Demo-Modus und einer Tampermonkey-Bridge
+zur echten Spielverbindung.
+
+**Einsteiger:innen ohne Terminal-Kenntnisse:** einfach [`desktop-app/Start-Dashboard.bat`](./desktop-app/Start-Dashboard.bat)
+per Doppelklick starten (Node.js muss einmalig installiert sein, Anleitung dort verlinkt).
+
 Details zu Architektur, Sicherheitskonzept und Installation (inkl. `.bat`-Installer) siehe
 [`desktop-app/README.md`](./desktop-app/README.md), [`desktop-app/ARCHITECTURE.md`](./desktop-app/ARCHITECTURE.md)
 und [`desktop-app/SECURITY.md`](./desktop-app/SECURITY.md).

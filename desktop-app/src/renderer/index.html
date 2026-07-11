@@ -13,10 +13,19 @@
     <aside class="sidebar">
       <div class="brand">🚨 LSS Dashboard</div>
       <nav>
-        <button class="nav-item active" data-view="overview" type="button">Übersicht</button>
-        <button class="nav-item" data-view="vehicles" type="button">Fahrzeuge</button>
-        <button class="nav-item" data-view="aao" type="button">AAO-Vorschläge</button>
-        <button class="nav-item" data-view="settings" type="button">Einstellungen</button>
+        <button class="nav-item active" data-view="overview" type="button">
+          <span>Übersicht</span>
+        </button>
+        <button class="nav-item" data-view="vehicles" type="button">
+          <span>Fahrzeuge</span>
+        </button>
+        <button class="nav-item" data-view="aao" type="button">
+          <span>AAO-Vorschläge</span>
+          <span id="aaoNavBadge" class="nav-badge hidden">0</span>
+        </button>
+        <button class="nav-item" data-view="settings" type="button">
+          <span>Einstellungen</span>
+        </button>
       </nav>
       <button id="toggleGameView" class="ghost-btn" type="button">Spiel-Ansicht einblenden</button>
     </aside>
@@ -24,8 +33,15 @@
     <main class="content">
       <header class="topbar">
         <h1 id="viewTitle">Übersicht</h1>
-        <button id="refreshBtn" class="ghost-btn" type="button">Aktualisieren</button>
+        <button id="refreshBtn" class="ghost-btn" type="button">
+          <span class="refresh-icon">⟳</span> Aktualisieren
+        </button>
       </header>
+
+      <div id="demoBanner" class="demo-banner hidden">
+        <span>🧪 Demo-Modus aktiv – dies sind Beispieldaten. Verbinde dein Konto unter „Einstellungen“.</span>
+        <button id="dismissDemoBtn" class="ghost-btn ghost-btn--small" type="button">Ausblenden</button>
+      </div>
 
       <section id="view-overview" class="view">
         <div class="widget-grid">
@@ -49,12 +65,15 @@
       </section>
 
       <section id="view-vehicles" class="view hidden">
+        <input id="vehicleSearch" class="search-input" type="search"
+               placeholder="Fahrzeuge nach Name oder Typ durchsuchen …" />
         <table class="data-table">
           <thead>
             <tr><th>ID</th><th>Name</th><th>Typ</th><th>FMS-Status</th></tr>
           </thead>
           <tbody id="vehicleTableBody"></tbody>
         </table>
+        <p id="vehicleEmptyHint" class="hint hidden">Keine Fahrzeuge gefunden.</p>
       </section>
 
       <section id="view-aao" class="view hidden">
@@ -62,6 +81,17 @@
       </section>
 
       <section id="view-settings" class="view hidden">
+        <h2 class="section-subtitle">Demo-Modus</h2>
+        <p class="hint">
+          Noch nicht verbunden? Lade Beispieldaten, um das Dashboard direkt auszuprobieren.
+        </p>
+        <div class="settings-actions">
+          <button id="loadDemoBtn" type="button">Demo-Daten laden</button>
+          <button id="stopDemoBtn" class="danger-btn hidden" type="button">Demo-Modus beenden</button>
+        </div>
+
+        <hr class="divider" />
+
         <label for="tokenInput">API-Token</label>
         <input id="tokenInput" type="password"
                placeholder="Bearer-Token aus den Leitstellenspiel-Entwicklereinstellungen" />
@@ -99,6 +129,9 @@
       </section>
     </main>
   </div>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
   <script src="scripts/dashboard.js"></script>
 </body>
 </html>
