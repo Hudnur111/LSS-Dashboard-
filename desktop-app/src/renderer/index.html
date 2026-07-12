@@ -65,11 +65,19 @@
       </section>
 
       <section id="view-vehicles" class="view hidden">
-        <input id="vehicleSearch" class="search-input" type="search"
-               placeholder="Fahrzeuge nach Name oder Typ durchsuchen …" />
+        <div class="vehicles-toolbar">
+          <input id="vehicleSearch" class="search-input" type="search"
+                 placeholder="Fahrzeuge nach Name oder Typ durchsuchen …" />
+          <button id="exportReportBtn" class="ghost-btn" type="button">Bericht exportieren (CSV)</button>
+        </div>
         <table class="data-table">
           <thead>
-            <tr><th>ID</th><th>Name</th><th>Typ</th><th>FMS-Status</th></tr>
+            <tr>
+              <th class="sortable" data-sort-key="id">ID</th>
+              <th class="sortable" data-sort-key="name">Name</th>
+              <th class="sortable" data-sort-key="vehicle_type_name">Typ</th>
+              <th class="sortable" data-sort-key="fms_status">FMS-Status</th>
+            </tr>
           </thead>
           <tbody id="vehicleTableBody"></tbody>
         </table>
@@ -126,6 +134,19 @@
         <button id="regenerateBridgeTokenBtn" class="danger-btn" type="button">
           Token neu generieren
         </button>
+
+        <hr class="divider" />
+
+        <h2 class="section-subtitle">Desktop-Integration</h2>
+        <label class="checkbox-row" for="autostartToggle">
+          <input id="autostartToggle" type="checkbox" />
+          <span>Mit Windows starten</span>
+        </label>
+        <p class="hint">
+          Schließen minimiert das Dashboard künftig in die Taskleiste (System-Tray) statt es
+          zu beenden – Polling und Tampermonkey-Bridge laufen währenddessen weiter. Über das
+          Tray-Symbol lässt sich das Fenster wieder öffnen oder die App vollständig beenden.
+        </p>
       </section>
     </main>
   </div>

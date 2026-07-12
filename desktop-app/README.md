@@ -1,8 +1,9 @@
 # LSS Dashboard – Desktop-App (Electron)
 
 Electron-Desktop-Erweiterung für das Browsergame [Leitstellenspiel](https://www.leitstellenspiel.de/):
-Dark-Mode-Dashboard mit Fahrzeug-Status, Einsatz-Monitoring und AAO-Alarmierungsvorschlägen,
-plus optionaler eingebetteter Spiel-Ansicht.
+Dark-Mode-Dashboard mit Fahrzeug-Status, Einsatz-Monitoring, AAO-Alarmierungsvorschlägen,
+Demo-Modus, System-Tray-Integration mit nativen Benachrichtigungen, CSV-Berichtsexport,
+Autostart mit Windows und optionaler eingebetteter Spiel-Ansicht.
 
 Architektur- und Sicherheitsdetails: siehe [`ARCHITECTURE.md`](./ARCHITECTURE.md) und
 [`SECURITY.md`](./SECURITY.md).
@@ -48,6 +49,18 @@ voneinander nutzen.
 Über "Spiel-Ansicht einblenden" kann zusätzlich die echte Spielseite optisch
 eingebettet angezeigt werden (eigene, persistente Login-Session) – das ist
 aber nur eine Sichtansicht, kein Datenweg.
+
+### Weitere Funktionen
+
+- **System-Tray**: Schließen des Fensters minimiert nur in die Taskleiste;
+  Polling/Bridge laufen weiter. Über das Tray-Symbol wieder öffnen oder
+  vollständig beenden.
+- **Native Benachrichtigungen** bei neuen Einsätzen, wenn das Fenster gerade
+  nicht im Fokus ist.
+- **Autostart mit Windows** (Einstellungen → Desktop-Integration).
+- **Bericht exportieren** (Fahrzeuge-Ansicht): speichert Fahrzeuge und
+  Einsätze als CSV-Datei über einen nativen Speichern-Dialog.
+- **Sortierbare Fahrzeugtabelle**: Spaltenüberschriften anklicken zum Sortieren.
 
 ## Build (Windows-Installer/Portable)
 

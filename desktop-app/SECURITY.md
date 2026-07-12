@@ -93,6 +93,23 @@ sie nie aus und speichert sie nie.
   kopieren nur lokal vorhandene, bereits gebaute Dateien und legen
   Verknüpfungen an.
 
+### Desktop-Integration (Tray, Export, Autostart)
+- Der CSV-Export (`export-report.js`) schreibt ausschließlich an einen Pfad,
+  den der Nutzer selbst über den nativen Betriebssystem-Speichern-Dialog
+  auswählt - kein automatisches Schreiben an einen festen Ort. Enthaltene
+  Daten (Fahrzeuge/Einsätze) sind exakt das, was im Dashboard ohnehin sichtbar
+  ist; keine Tokens oder Zugangsdaten landen in der Datei.
+- Autostart (`app.setLoginItemSettings`) nutzt ausschließlich den
+  Standard-Mechanismus des Betriebssystems (Registry-Eintrag unter Windows,
+  ohne erhöhte Rechte) und lässt sich jederzeit über dieselbe Checkbox wieder
+  deaktivieren.
+- Der System-Tray zeigt im Tooltip nur eine Zahl offener Einsätze, keine
+  weiteren Details - auch im gesperrten/minimierten Zustand werden keine
+  sensiblen Daten außerhalb des Hauptfensters dargestellt.
+- Native Desktop-Benachrichtigungen (`notifier.js`) enthalten nur
+  Einsatzbezeichnungen, dieselben Informationen, die ohnehin über die
+  offizielle API abgerufen wurden - keine zusätzliche Datenquelle.
+
 ## Bewusste Nicht-Ziele
 
 - Keine Automatisierung von Spielhandlungen (kein Auto-Alarmieren, keine

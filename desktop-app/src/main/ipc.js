@@ -1,10 +1,11 @@
 'use strict';
 
-const { ipcMain } = require('electron');
+const { ipcMain, app } = require('electron');
 const { CHANNELS, BRIDGE_PORT } = require('../shared/constants');
 const secureStore = require('./secure-store');
 const bridgeTokenStore = require('./bridge-token-store');
 const { fetchVehicles, fetchMissions } = require('./api-client');
+const { exportReport } = require('./export-report');
 const hub = require('./game-data-hub');
 
 const POLL_INTERVAL_MS = 20_000;
@@ -46,6 +47,9 @@ function registerIpcHandlers(dashboardWindow) {
     CHANNELS.REFRESH_REQUEST,
     CHANNELS.BRIDGE_TOKEN_GET,
     CHANNELS.BRIDGE_TOKEN_REGENERATE,
+    CHANNELS.AUTOSTART_GET,
+    CHANNELS.AUTOSTART_SET,
+    CHANNELS.EXPORT_REPORT,
   ]) {
     ipcMain.removeHandler(channel);
   }
@@ -89,6 +93,23 @@ function registerIpcHandlers(dashboardWindow) {
     // "connected" badge showing stale trust.
     hub.sendBridgeStatus(dashboardWindow);
     return { token };
+  });
+
+  // `openAtLogin` is per-OS-user, not per-app-instance - electron-builder's
+  // packaged app is what actually gets registered, so this only takes effect
+  // in a built/installed copy, not `electron .` from source.
+  ipcMain.handle(CHANNELS.AUTOSTART_GET, async () => ({
+    enabled: app.getLoginItemSettings().openAtLogin,
+  }));
+
+  ipcMain.handle(CHANNELS.AUTOSTART_SET, async (_event, enabled) => {
+    app.setLoginItemSettings({ openAtLogin: Boolean(enabled) });
+    return { enabled: Boolean(enabled) };
+  });
+
+  ipcMain.handle(CHANNELS.EXPORT_REPORT, async () => {
+    const { vehicles, missions } = hub.getLastSnapshot();
+    return exportReport(dashboardWindow, { vehicles, missions });
   });
 
   // Signal from the embedded game view's DOM observer (preload/game-preload.js):

@@ -9,14 +9,34 @@ const { buildSuggestions } = require('./aao-engine');
 const BRIDGE_STALE_AFTER_MS = 60_000;
 let lastBridgeSeenAt = null;
 
+// Last known snapshot, kept around for consumers that don't sit on the IPC
+// stream themselves (CSV export, tray tooltip, native notifications).
+let lastSnapshot = { vehicles: [], missions: [] };
+
+const publishListeners = new Set();
+
+function onPublish(fn) {
+  publishListeners.add(fn);
+  return () => publishListeners.delete(fn);
+}
+
 function publish(dashboardWindow, { vehicles = [], missions = [] } = {}) {
-  if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
-  dashboardWindow.webContents.send(CHANNELS.TO_RENDERER.VEHICLE_UPDATE, vehicles);
-  dashboardWindow.webContents.send(CHANNELS.TO_RENDERER.GAME_DATA, { vehicles, missions });
-  dashboardWindow.webContents.send(
-    CHANNELS.TO_RENDERER.AAO_SUGGESTIONS,
-    buildSuggestions(vehicles, missions)
-  );
+  lastSnapshot = { vehicles, missions };
+  const suggestions = buildSuggestions(vehicles, missions);
+
+  if (dashboardWindow && !dashboardWindow.isDestroyed()) {
+    dashboardWindow.webContents.send(CHANNELS.TO_RENDERER.VEHICLE_UPDATE, vehicles);
+    dashboardWindow.webContents.send(CHANNELS.TO_RENDERER.GAME_DATA, { vehicles, missions });
+    dashboardWindow.webContents.send(CHANNELS.TO_RENDERER.AAO_SUGGESTIONS, suggestions);
+  }
+
+  for (const fn of publishListeners) {
+    try {
+      fn({ vehicles, missions, suggestions });
+    } catch (err) {
+      console.error('[lss-dashboard] onPublish-Listener fehlgeschlagen:', err.message);
+    }
+  }
 }
 
 function ingestFromBridge(dashboardWindow, payload) {
@@ -37,4 +57,8 @@ function sendBridgeStatus(dashboardWindow) {
   });
 }
 
-module.exports = { publish, ingestFromBridge, sendBridgeStatus };
+function getLastSnapshot() {
+  return lastSnapshot;
+}
+
+module.exports = { publish, ingestFromBridge, sendBridgeStatus, onPublish, getLastSnapshot };

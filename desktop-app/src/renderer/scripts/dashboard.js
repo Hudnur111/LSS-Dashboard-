@@ -6,6 +6,8 @@ const state = {
   suggestions: [],
   vehicleFilter: '',
   isDemo: false,
+  sortKey: null,
+  sortDir: 'asc',
 };
 
 const qs = (id) => document.getElementById(id);
@@ -94,6 +96,23 @@ function renderOverview() {
   animateCount(qs('wFullyAlerted'), state.suggestions.filter((s) => s.vollstaendigVerfuegbar).length);
 }
 
+function vehicleSortValue(vehicle, key) {
+  if (key === 'vehicle_type_name') return vehicle.vehicle_type_name ?? vehicle.type ?? '';
+  if (key === 'fms_status') return vehicle.fms_status ?? vehicle.fmsStatus ?? -1;
+  return vehicle[key] ?? '';
+}
+
+function sortVehicles(vehicles) {
+  if (!state.sortKey) return vehicles;
+  const direction = state.sortDir === 'asc' ? 1 : -1;
+  return [...vehicles].sort((a, b) => {
+    const valueA = vehicleSortValue(a, state.sortKey);
+    const valueB = vehicleSortValue(b, state.sortKey);
+    if (typeof valueA === 'number' && typeof valueB === 'number') return (valueA - valueB) * direction;
+    return String(valueA).localeCompare(String(valueB), 'de') * direction;
+  });
+}
+
 function renderVehicles() {
   const tbody = qs('vehicleTableBody');
   tbody.innerHTML = '';
@@ -104,10 +123,11 @@ function renderVehicles() {
     const type = (vehicle.vehicle_type_name ?? vehicle.type ?? '').toLowerCase();
     return name.includes(filter) || type.includes(filter);
   });
+  const sorted = sortVehicles(filtered);
 
-  qs('vehicleEmptyHint').classList.toggle('hidden', filtered.length !== 0);
+  qs('vehicleEmptyHint').classList.toggle('hidden', sorted.length !== 0);
 
-  for (const vehicle of filtered) {
+  for (const vehicle of sorted) {
     const status = vehicle.fms_status ?? vehicle.fmsStatus ?? '–';
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -298,6 +318,39 @@ function setupVehicleSearch() {
   });
 }
 
+function setupVehicleSort() {
+  const headers = document.querySelectorAll('#view-vehicles th.sortable');
+  headers.forEach((th) => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.sortKey;
+      state.sortDir = state.sortKey === key && state.sortDir === 'asc' ? 'desc' : 'asc';
+      state.sortKey = key;
+      headers.forEach((h) => h.classList.remove('sort-asc', 'sort-desc'));
+      th.classList.add(state.sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+      renderVehicles();
+    });
+  });
+}
+
+function setupExport() {
+  qs('exportReportBtn').addEventListener('click', async () => {
+    const result = await window.lssAPI.exportReport();
+    if (result.canceled) return;
+    if (result.ok) showToast(`Bericht gespeichert: ${result.filePath}`, 'success');
+    else showToast('Export fehlgeschlagen.', 'error');
+  });
+}
+
+async function setupAutostart() {
+  const { enabled } = await window.lssAPI.getAutostart();
+  qs('autostartToggle').checked = enabled;
+
+  qs('autostartToggle').addEventListener('change', async (event) => {
+    const { enabled: applied } = await window.lssAPI.setAutostart(event.target.checked);
+    showToast(applied ? 'Autostart mit Windows aktiviert.' : 'Autostart deaktiviert.', 'success');
+  });
+}
+
 function subscribeToBackend() {
   let previousMissionCount = 0;
 
@@ -323,10 +376,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupGameViewToggle();
   setupRefresh();
   setupVehicleSearch();
+  setupVehicleSort();
+  setupExport();
   subscribeToBackend();
 
   const settings = await setupSettings();
   await setupBridgeSettings();
+  await setupAutostart();
 
   // Frisch installierte App ohne jede Verbindung: sofort Beispieldaten zeigen,
   // statt den Nutzer mit einem leeren Dashboard zurückzulassen. Sobald echte

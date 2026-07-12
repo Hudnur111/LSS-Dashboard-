@@ -13,6 +13,9 @@ const CHANNELS = {
   REFRESH_REQUEST: 'refresh:request',
   BRIDGE_TOKEN_GET: 'bridge:token-get',
   BRIDGE_TOKEN_REGENERATE: 'bridge:token-regenerate',
+  AUTOSTART_GET: 'autostart:get',
+  AUTOSTART_SET: 'autostart:set',
+  EXPORT_REPORT: 'report:export',
   TO_RENDERER: {
     GAME_DATA: 'game:data',
     AAO_SUGGESTIONS: 'aao:suggestions',
@@ -51,6 +54,11 @@ contextBridge.exposeInMainWorld('lssAPI', {
 
   getBridgeInfo: () => ipcRenderer.invoke(CHANNELS.BRIDGE_TOKEN_GET),
   regenerateBridgeToken: () => ipcRenderer.invoke(CHANNELS.BRIDGE_TOKEN_REGENERATE),
+
+  getAutostart: () => ipcRenderer.invoke(CHANNELS.AUTOSTART_GET),
+  setAutostart: (enabled) => ipcRenderer.invoke(CHANNELS.AUTOSTART_SET, enabled),
+
+  exportReport: () => ipcRenderer.invoke(CHANNELS.EXPORT_REPORT),
 
   // `clipboard` is one of Electron's whitelisted core modules, so it remains
   // requireable even under `sandbox: true` - used only for the one-click

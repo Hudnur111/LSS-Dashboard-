@@ -17,6 +17,7 @@
 | Packaging | `electron-builder` (NSIS + Portable) | Standard für professionelle Windows-Distribution, Code-Signing-fähig. |
 | Erst-Installation | `installer/install.bat` + `create-shortcut.ps1` | Einfache End-User-Experience für die portable Variante: kopiert nach `%LOCALAPPDATA%`, erstellt Verknüpfungen, startet die App. |
 | Erststart für Entwickler-Setup | `Start-Dashboard.bat` | Für Nutzer, die aus dem Quellordner starten statt einen fertigen Build zu installieren: prüft Node.js, führt `npm install`/`npm start` selbst aus – kein Terminal/keine Befehle nötig. Siehe Abschnitt 7. |
+| Desktop-Integration | `Tray` + `Notification` (Electron, kein npm-Zusatzpaket) | System-Tray statt Beenden beim Schließen, native Windows-Benachrichtigungen für neue Einsätze, Autostart via `app.setLoginItemSettings`. Siehe Abschnitt 8. |
 
 ## 2. Prozess- und Modul-Struktur
 
@@ -33,7 +34,10 @@ desktop-app/
 │   │   ├── secure-store.js         # Verschlüsselte Ablage des API-Tokens (safeStorage)
 │   │   ├── bridge-token-store.js   # Verschlüsselte Ablage des Tampermonkey-Pairing-Tokens (safeStorage)
 │   │   ├── bridge-server.js        # Lokaler HTTP-Server (127.0.0.1) für die Tampermonkey-Bridge
-│   │   ├── game-data-hub.js        # Gemeinsamer Publish-Pfad für Polling- und Bridge-Daten -> Renderer
+│   │   ├── game-data-hub.js        # Gemeinsamer Publish-Pfad für Polling- und Bridge-Daten -> Renderer + Tray/Notifier
+│   │   ├── tray.js                 # System-Tray-Symbol, Kontextmenü, Tooltip mit offenen Einsätzen
+│   │   ├── notifier.js             # Native OS-Benachrichtigungen bei neuen Einsätzen (nur wenn Fenster unfokussiert)
+│   │   ├── export-report.js        # CSV-Berichtsexport (Fahrzeuge + Einsätze) über nativen Speichern-Dialog
 │   │   ├── api-client.js           # HTTP-Client für die offizielle LSS-API
 │   │   └── aao-engine.js           # Regelbasierte AAO-Vorschlagslogik (rein lesend)
 │   ├── renderer/
@@ -166,3 +170,31 @@ ohne zusätzliche Abhängigkeiten:
 Bewusst nicht verwendet: keine Chart-/Animation-Bibliothek, kein CSS-Framework
 – konsistent mit der "keine CDN-Skripte, minimale Abhängigkeiten"-Entscheidung
 aus Abschnitt 1.
+
+## 8. Desktop-Integration: Tray, Benachrichtigungen, Autostart, Export
+
+- **System-Tray statt Beenden** (`main.js`, `tray.js`): Das Schließen des
+  Fensters (X-Button) ruft `event.preventDefault()` in einem `close`-Handler
+  auf und versteckt das Fenster nur (`hide()`), statt den Prozess zu beenden -
+  Polling-Loop und Bridge-Server laufen unbeeinträchtigt weiter. Einziger
+  echter Beenden-Weg ist "Beenden" im Tray-Kontextmenü, das `app.isQuitting`
+  setzt; nur dann lässt der `close`-Handler das eigentliche Schließen zu.
+  Tray-Icon fällt auf ein eingebettetes 1x1-Platzhalterbild zurück, falls kein
+  `build/icon.png` existiert (siehe `build/README.md`).
+- **Native Benachrichtigungen** (`notifier.js`): Bei neu erkannten Einsätzen
+  (Vergleich gegen die vorherige Missions-ID-Menge) zeigt Electrons
+  `Notification`-API einen System-Hinweis - aber nur, wenn das Dashboard-
+  Fenster gerade *nicht* fokussiert ist (der In-App-Toast deckt den
+  fokussierten Fall bereits ab) und nicht beim allerersten Snapshot nach
+  Start/Demo-Ende (sonst würde jeder bereits offene Einsatz fälschlich als
+  "neu" gemeldet).
+- **Autostart mit Windows** (`ipc.js` `AUTOSTART_GET`/`AUTOSTART_SET`):
+  dünner Wrapper um `app.setLoginItemSettings()`. Greift nur in einem
+  gepackten/installierten Build, nicht bei `electron .` aus dem Quellordner.
+- **CSV-Berichtsexport** (`export-report.js`): schreibt Fahrzeuge und
+  Einsätze aus dem zuletzt bekannten Snapshot (`game-data-hub.getLastSnapshot()`)
+  als zwei CSV-Abschnitte in eine vom Nutzer gewählte Datei (nativer
+  Speichern-Dialog). UTF-8-BOM vorangestellt, damit Excel unter Windows
+  Umlaute korrekt anzeigt statt sie als Kauderwelsch zu interpretieren.
+- Alle vier Features hängen an `game-data-hub.onPublish()` bzw. eigenen
+  IPC-Handlern und benötigen keine zusätzlichen npm-Abhängigkeiten.

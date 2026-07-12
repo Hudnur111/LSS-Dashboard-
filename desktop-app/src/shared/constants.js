@@ -34,6 +34,9 @@ module.exports = {
     REFRESH_REQUEST: 'refresh:request',
     BRIDGE_TOKEN_GET: 'bridge:token-get',
     BRIDGE_TOKEN_REGENERATE: 'bridge:token-regenerate',
+    AUTOSTART_GET: 'autostart:get',
+    AUTOSTART_SET: 'autostart:set',
+    EXPORT_REPORT: 'report:export',
     TO_RENDERER: {
       GAME_DATA: 'game:data',
       AAO_SUGGESTIONS: 'aao:suggestions',
