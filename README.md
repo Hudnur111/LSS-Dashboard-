@@ -55,7 +55,7 @@ willkommen.
 Dieses Projekt entstand als Zusammenarbeit zwischen menschlicher und
 KI-gestützter Arbeit:
 
-- **~60 % Eigenanteil** – Idee, Konzept, Produktentscheidungen, Ausrichtung
+- **~60 % Eigenanteil** – Idee, Konzept, Umsetzung, Produktentscheidungen, Ausrichtung
   und Review durch [Hudnur111](https://github.com/Hudnur111).
 - **~40 % KI-Anteil** – Umsetzung, Architektur-Vorschläge und Dokumentation
   mit Unterstützung von [Claude](https://claude.com/) (Anthropic).
