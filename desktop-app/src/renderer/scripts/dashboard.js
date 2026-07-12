@@ -258,38 +258,6 @@ async function setupSettings() {
   return settings;
 }
 
-async function setupBridgeSettings() {
-  const { token, port } = await window.lssAPI.getBridgeInfo();
-  qs('bridgeTokenDisplay').value = token;
-  qs('bridgePort').textContent = port;
-
-  qs('copyBridgeTokenBtn').addEventListener('click', () => {
-    window.lssAPI.copyText(qs('bridgeTokenDisplay').value);
-    showToast('Token in die Zwischenablage kopiert.', 'success', 2000);
-  });
-
-  qs('regenerateBridgeTokenBtn').addEventListener('click', async () => {
-    const confirmed = window.confirm(
-      'Neuen Token generieren? Bereits im Tampermonkey-Menü hinterlegte Tokens funktionieren danach nicht mehr, bis du sie dort aktualisierst.'
-    );
-    if (!confirmed) return;
-    const { token: newToken } = await window.lssAPI.regenerateBridgeToken();
-    qs('bridgeTokenDisplay').value = newToken;
-    showToast('Neuer Pairing-Token generiert.', 'success');
-  });
-
-  let wasConnected = false;
-  window.lssAPI.onBridgeStatus(({ connected, lastSeenAt }) => {
-    qs('bridgeStatusDot').classList.toggle('online', connected);
-    qs('bridgeStatusText').textContent = connected
-      ? `Verbunden (zuletzt ${new Date(lastSeenAt).toLocaleTimeString('de-DE')})`
-      : 'Kein Kontakt';
-    if (connected && !wasConnected) showToast('Tampermonkey-Bridge verbunden.', 'success');
-    if (!connected && wasConnected) showToast('Tampermonkey-Bridge getrennt.', 'error');
-    wasConnected = connected;
-  });
-}
-
 function setupGameViewToggle() {
   let visible = false;
   qs('toggleGameView').addEventListener('click', async () => {
@@ -381,7 +349,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   subscribeToBackend();
 
   const settings = await setupSettings();
-  await setupBridgeSettings();
   await setupAutostart();
 
   // Frisch installierte App ohne jede Verbindung: sofort Beispieldaten zeigen,

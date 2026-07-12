@@ -9,11 +9,6 @@ module.exports = {
   GAME_URL: 'https://www.leitstellenspiel.de/',
   GAME_SESSION_PARTITION: 'persist:lss-game',
 
-  // Local-only HTTP bridge the Tampermonkey userscript posts to. Bound to
-  // 127.0.0.1 in bridge-server.js - never reachable from the LAN.
-  BRIDGE_HOST: '127.0.0.1',
-  BRIDGE_PORT: 17845,
-
   // Best-effort CSS selectors for the game's live mission list. These are a
   // starting point, not verified against the current production markup -
   // adjust them here after inspecting a real logged-in session (DevTools).
@@ -32,8 +27,6 @@ module.exports = {
     TOKEN_CLEAR: 'token:clear',
     TOKEN_HAS: 'token:has',
     REFRESH_REQUEST: 'refresh:request',
-    BRIDGE_TOKEN_GET: 'bridge:token-get',
-    BRIDGE_TOKEN_REGENERATE: 'bridge:token-regenerate',
     AUTOSTART_GET: 'autostart:get',
     AUTOSTART_SET: 'autostart:set',
     EXPORT_REPORT: 'report:export',
@@ -41,7 +34,6 @@ module.exports = {
       GAME_DATA: 'game:data',
       AAO_SUGGESTIONS: 'aao:suggestions',
       VEHICLE_UPDATE: 'vehicle:update',
-      BRIDGE_STATUS: 'bridge:status',
     },
   },
 };

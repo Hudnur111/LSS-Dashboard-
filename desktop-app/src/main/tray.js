@@ -20,8 +20,8 @@ function loadTrayIcon() {
 }
 
 // Closing the window hides it instead of quitting (see main.js) so the app
-// keeps polling/serving the bridge in the background - the tray is the only
-// way back in, and its own "Beenden" is the only way to actually quit.
+// keeps polling in the background - the tray is the only way back in, and
+// its own "Beenden" is the only way to actually quit.
 // Takes a getter instead of a window reference so it keeps working across a
 // window being recreated (e.g. macOS re-activate after a real destroy).
 function createTray(getDashboardWindow) {

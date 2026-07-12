@@ -1,15 +1,13 @@
 'use strict';
 
 const { ipcMain, app } = require('electron');
-const { CHANNELS, BRIDGE_PORT } = require('../shared/constants');
+const { CHANNELS } = require('../shared/constants');
 const secureStore = require('./secure-store');
-const bridgeTokenStore = require('./bridge-token-store');
 const { fetchVehicles, fetchMissions } = require('./api-client');
 const { exportReport } = require('./export-report');
 const hub = require('./game-data-hub');
 
 const POLL_INTERVAL_MS = 20_000;
-const BRIDGE_STATUS_INTERVAL_MS = 15_000;
 let pollTimer = null;
 
 async function pollOnce(dashboardWindow) {
@@ -45,8 +43,6 @@ function registerIpcHandlers(dashboardWindow) {
     CHANNELS.TOKEN_HAS,
     CHANNELS.GAME_VIEW_TOGGLE,
     CHANNELS.REFRESH_REQUEST,
-    CHANNELS.BRIDGE_TOKEN_GET,
-    CHANNELS.BRIDGE_TOKEN_REGENERATE,
     CHANNELS.AUTOSTART_GET,
     CHANNELS.AUTOSTART_SET,
     CHANNELS.EXPORT_REPORT,
@@ -81,20 +77,6 @@ function registerIpcHandlers(dashboardWindow) {
     return { ok: true };
   });
 
-  ipcMain.handle(CHANNELS.BRIDGE_TOKEN_GET, async () => ({
-    token: bridgeTokenStore.getOrCreateBridgeToken(),
-    port: BRIDGE_PORT,
-  }));
-
-  ipcMain.handle(CHANNELS.BRIDGE_TOKEN_REGENERATE, async () => {
-    const token = bridgeTokenStore.regenerateBridgeToken();
-    // Regenerating invalidates every already-paired browser tab immediately -
-    // surface that as a hard status reset instead of leaving the previous
-    // "connected" badge showing stale trust.
-    hub.sendBridgeStatus(dashboardWindow);
-    return { token };
-  });
-
   // `openAtLogin` is per-OS-user, not per-app-instance - electron-builder's
   // packaged app is what actually gets registered, so this only takes effect
   // in a built/installed copy, not `electron .` from source.
@@ -117,13 +99,6 @@ function registerIpcHandlers(dashboardWindow) {
   // immediate, authoritative poll against the official API.
   ipcMain.on(CHANNELS.GAME_RAW_EVENT, () => pollOnce(dashboardWindow));
   ipcMain.on(CHANNELS.GAME_VIEW_READY, () => {});
-
-  const bridgeStatusInterval = setInterval(
-    () => hub.sendBridgeStatus(dashboardWindow),
-    BRIDGE_STATUS_INTERVAL_MS
-  );
-  dashboardWindow.once('closed', () => clearInterval(bridgeStatusInterval));
-  hub.sendBridgeStatus(dashboardWindow);
 
   if (secureStore.hasToken()) startPolling(dashboardWindow);
 }

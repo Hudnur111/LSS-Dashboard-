@@ -32,19 +32,13 @@ npm start
 
 ### Verbindung zum Spiel herstellen
 
-**Empfohlen: Tampermonkey-Bridge** – läuft in deinem normalen, bereits
-eingeloggten Browser statt in einem eingebetteten Login-Fenster. Anleitung:
-[`tampermonkey/README.md`](./tampermonkey/README.md). Kurzfassung:
+Unter **Einstellungen** den persönlichen API-Bearer-Token hinterlegen
+(Leitstellenspiel → Account → Entwicklereinstellungen). Der Token wird
+ausschließlich verschlüsselt lokal gespeichert (siehe `SECURITY.md`).
 
-1. Tampermonkey-Skript installieren (`tampermonkey/lss-dashboard-bridge.user.js`).
-2. In der App unter **Einstellungen → Tampermonkey-Bridge** den Pairing-Token
-   kopieren, im Tampermonkey-Menü auf leitstellenspiel.de einfügen.
-
-**Alternativ: reines API-Token-Polling** – unter **Einstellungen** den
-persönlichen API-Bearer-Token hinterlegen (Leitstellenspiel → Account →
-Entwicklereinstellungen). Beide Wege speichern ihre Tokens ausschließlich
-verschlüsselt lokal (siehe `SECURITY.md`) und lassen sich unabhängig
-voneinander nutzen.
+> Alternative Anbindung ohne API-Token: Der Branch `tampermonkey` dieses
+> Repos baut auf diesem Branch auf und ergänzt eine Tampermonkey-Bridge, die
+> die Daten direkt aus deinem normalen, bereits eingeloggten Browser liest.
 
 Über "Spiel-Ansicht einblenden" kann zusätzlich die echte Spielseite optisch
 eingebettet angezeigt werden (eigene, persistente Login-Session) – das ist
@@ -53,7 +47,7 @@ aber nur eine Sichtansicht, kein Datenweg.
 ### Weitere Funktionen
 
 - **System-Tray**: Schließen des Fensters minimiert nur in die Taskleiste;
-  Polling/Bridge laufen weiter. Über das Tray-Symbol wieder öffnen oder
+  das API-Polling läuft weiter. Über das Tray-Symbol wieder öffnen oder
   vollständig beenden.
 - **Native Benachrichtigungen** bei neuen Einsätzen, wenn das Fenster gerade
   nicht im Fokus ist.

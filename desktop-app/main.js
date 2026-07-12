@@ -3,15 +3,12 @@
 const { app, BrowserWindow, session } = require('electron');
 const { createDashboardWindow } = require('./src/main/windows');
 const { registerIpcHandlers } = require('./src/main/ipc');
-const { createBridgeServer } = require('./src/main/bridge-server');
 const { createTray, updateTrayStatus } = require('./src/main/tray');
 const { notifyNewMissions } = require('./src/main/notifier');
-const bridgeTokenStore = require('./src/main/bridge-token-store');
 const gameDataHub = require('./src/main/game-data-hub');
 const { GAME_SESSION_PARTITION } = require('./src/shared/constants');
 
 let dashboardWindow = null;
-let bridgeServer = null;
 let tray = null;
 let knownMissionIds = new Set();
 
@@ -29,8 +26,8 @@ function boot() {
   registerIpcHandlers(dashboardWindow);
 
   // Closing the window (the X button) minimizes to tray instead of quitting,
-  // so the poll loop and bridge server keep running in the background - the
-  // only real quit path is the tray's own "Beenden" (sets app.isQuitting).
+  // so the poll loop keeps running in the background - the only real quit
+  // path is the tray's own "Beenden" (sets app.isQuitting).
   dashboardWindow.on('close', (event) => {
     if (app.isQuitting) return;
     event.preventDefault();
@@ -38,20 +35,9 @@ function boot() {
   });
 }
 
-// One local HTTP endpoint for the whole app lifetime, independent of window
-// creation/recreation - `dashboardWindow` is read through the closure at
-// ingest time, so it always targets whichever window currently exists.
-function startBridgeServer() {
-  if (bridgeServer) return;
-  bridgeServer = createBridgeServer({
-    getToken: bridgeTokenStore.getOrCreateBridgeToken,
-    onIngest: (payload) => gameDataHub.ingestFromBridge(dashboardWindow, payload),
-  });
-}
-
 // Keeps the tray tooltip and native notifications in sync with every
-// published snapshot, regardless of whether it came from API-token polling
-// or the Tampermonkey bridge - single subscription point, see game-data-hub.js.
+// published snapshot from the API-token poll loop - single subscription
+// point, see game-data-hub.js.
 function watchGameData() {
   gameDataHub.onPublish(({ missions }) => {
     updateTrayStatus(tray, { openMissions: missions.length });
@@ -63,7 +49,6 @@ function watchGameData() {
 app.whenReady().then(() => {
   hardenGameSession();
   boot();
-  startBridgeServer();
   tray = createTray(() => dashboardWindow);
   watchGameData();
 
@@ -85,7 +70,6 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   app.isQuitting = true;
-  if (bridgeServer) bridgeServer.close();
   if (tray && !tray.isDestroyed()) tray.destroy();
 });
 

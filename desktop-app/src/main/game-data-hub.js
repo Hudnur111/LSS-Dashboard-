@@ -3,11 +3,10 @@
 const { CHANNELS } = require('../shared/constants');
 const { buildSuggestions } = require('./aao-engine');
 
-// Single fan-out point for game data, regardless of where it came from (the
-// API-token poll loop in ipc.js, or a Tampermonkey POST via bridge-server.js).
-// Keeps the AAO-suggestion computation in exactly one place.
-const BRIDGE_STALE_AFTER_MS = 60_000;
-let lastBridgeSeenAt = null;
+// Single fan-out point for game data coming from the API-token poll loop in
+// ipc.js. Keeps the AAO-suggestion computation in exactly one place, and
+// gives other consumers (tray tooltip, native notifications, CSV export) a
+// shared subscription point instead of re-deriving state themselves.
 
 // Last known snapshot, kept around for consumers that don't sit on the IPC
 // stream themselves (CSV export, tray tooltip, native notifications).
@@ -39,26 +38,8 @@ function publish(dashboardWindow, { vehicles = [], missions = [] } = {}) {
   }
 }
 
-function ingestFromBridge(dashboardWindow, payload) {
-  lastBridgeSeenAt = Date.now();
-  publish(dashboardWindow, {
-    vehicles: Array.isArray(payload?.vehicles) ? payload.vehicles : [],
-    missions: Array.isArray(payload?.missions) ? payload.missions : [],
-  });
-  sendBridgeStatus(dashboardWindow);
-}
-
-function sendBridgeStatus(dashboardWindow) {
-  if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
-  const connected = lastBridgeSeenAt !== null && Date.now() - lastBridgeSeenAt < BRIDGE_STALE_AFTER_MS;
-  dashboardWindow.webContents.send(CHANNELS.TO_RENDERER.BRIDGE_STATUS, {
-    connected,
-    lastSeenAt: lastBridgeSeenAt,
-  });
-}
-
 function getLastSnapshot() {
   return lastSnapshot;
 }
 
-module.exports = { publish, ingestFromBridge, sendBridgeStatus, onPublish, getLastSnapshot };
+module.exports = { publish, onPublish, getLastSnapshot };

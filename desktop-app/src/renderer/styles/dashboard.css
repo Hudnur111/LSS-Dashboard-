@@ -342,53 +342,6 @@ nav {
 
 .section-subtitle { font-size: 1.1rem; margin: 0 0 8px; }
 
-.bridge-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.status-dot {
-  position: relative;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--danger);
-  flex-shrink: 0;
-  transition: background-color 0.2s ease;
-}
-
-.status-dot.online { background: var(--ok); }
-
-.status-dot.online::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: var(--ok);
-  animation: status-pulse 1.8s ease-out infinite;
-}
-
-@keyframes status-pulse {
-  0% { transform: scale(1); opacity: 0.6; }
-  100% { transform: scale(2.4); opacity: 0; }
-}
-
-.token-row {
-  display: flex;
-  gap: 8px;
-  max-width: 480px;
-  margin-bottom: 8px;
-}
-
-.token-row #bridgeTokenDisplay {
-  flex-grow: 1;
-  margin-bottom: 0;
-  font-family: "Cascadia Code", "Consolas", monospace;
-  font-size: 0.85rem;
-}
-
 code {
   background: rgba(255, 255, 255, 0.08);
   padding: 1px 5px;

@@ -41,10 +41,15 @@ Die Installationsanleitung wird bereitgestellt, sobald die Grundfunktionen imple
 ---
 
 ## 🖥️ Desktop-App (Electron)
-Neben dem Web-Prototyp (`index.html`) gibt es im Ordner [`desktop-app/`](./desktop-app) eine
-vollwertige Electron-Desktop-Anwendung mit Dark-Mode-Dashboard, Fahrzeug-Status,
-Einsatz-Monitoring, AAO-Alarmierungsvorschlägen, Demo-Modus und einer Tampermonkey-Bridge
-zur echten Spielverbindung.
+Neben dem Web-Prototyp (`index.html`, Branch `main`) gibt es im Ordner
+[`desktop-app/`](./desktop-app) eine vollwertige Electron-Desktop-Anwendung mit
+Dark-Mode-Dashboard, Fahrzeug-Status, Einsatz-Monitoring, AAO-Alarmierungsvorschlägen,
+Demo-Modus, System-Tray und CSV-Berichtsexport.
+
+Dieser Branch (`dashboard`) verbindet sich über einen persönlichen API-Token.
+Der Branch [`tampermonkey`](https://github.com/Hudnur111/LSS-Dashboard-/tree/tampermonkey)
+baut darauf auf und ergänzt eine Tampermonkey-Bridge als alternative
+Spielverbindung ohne API-Token.
 
 **Einsteiger:innen ohne Terminal-Kenntnisse:** einfach [`desktop-app/Start-Dashboard.bat`](./desktop-app/Start-Dashboard.bat)
 per Doppelklick starten (Node.js muss einmalig installiert sein, Anleitung dort verlinkt).
