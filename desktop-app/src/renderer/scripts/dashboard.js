@@ -336,6 +336,17 @@ function subscribeToBackend() {
     state.suggestions = suggestions ?? [];
     renderAll();
   });
+  window.lssAPI.onPollStatus(({ ok, message }) => {
+    qs('connectionErrorBanner').classList.toggle('hidden', ok);
+    if (!ok) {
+      qs('connectionErrorText').textContent = message
+        ? `⚠️ Verbindung zur Leitstellenspiel-API fehlgeschlagen: ${message}`
+        : '⚠️ Verbindung zur Leitstellenspiel-API fehlgeschlagen.';
+      showToast('Verbindung zur API fehlgeschlagen.', 'error');
+    } else {
+      showToast('Verbindung zur API wiederhergestellt.', 'success');
+    }
+  });
 }
 
 window.addEventListener('DOMContentLoaded', async () => {

@@ -16,6 +16,7 @@
 | Erst-Installation | `installer/install.bat` + `create-shortcut.ps1` | Einfache End-User-Experience für die portable Variante: kopiert nach `%LOCALAPPDATA%`, erstellt Verknüpfungen, startet die App. |
 | Erststart für Entwickler-Setup | `Start-Dashboard.bat` | Für Nutzer, die aus dem Quellordner starten statt einen fertigen Build zu installieren: prüft Node.js, führt `npm install`/`npm start` selbst aus – kein Terminal/keine Befehle nötig. Siehe Abschnitt 6. |
 | Desktop-Integration | `Tray` + `Notification` (Electron, kein npm-Zusatzpaket) | System-Tray statt Beenden beim Schließen, native Windows-Benachrichtigungen für neue Einsätze, Autostart via `app.setLoginItemSettings`. Siehe Abschnitt 7. |
+| Testing | Node-eingebauter Test-Runner (`node --test`), kein Testframework als Abhängigkeit | Deckt die reine Logik ab (`aao-engine`, `game-data-hub`, `report-formatter`), die ohne laufendes Electron testbar ist. Siehe Abschnitt 9. |
 
 ## 2. Prozess- und Modul-Struktur
 
@@ -28,14 +29,16 @@ desktop-app/
 ├── src/
 │   ├── main/
 │   │   ├── windows.js           # Dashboard-BrowserWindow + optionale Spiel-BrowserView, Layout/Resize
+│   │   ├── window-state.js       # Merkt sich Fenstergröße/-position zwischen Starts
 │   │   ├── ipc.js                # Alle ipcMain-Handler, Polling-Loop, Verdrahtung Renderer <-> Backend
 │   │   ├── secure-store.js       # Verschlüsselte Ablage des API-Tokens (safeStorage)
 │   │   ├── game-data-hub.js      # Gemeinsamer Publish-Pfad für Polling-Daten -> Renderer + Tray/Notifier
 │   │   ├── tray.js               # System-Tray-Symbol, Kontextmenü, Tooltip mit offenen Einsätzen
 │   │   ├── notifier.js           # Native OS-Benachrichtigungen bei neuen Einsätzen (nur wenn Fenster unfokussiert)
-│   │   ├── export-report.js      # CSV-Berichtsexport (Fahrzeuge + Einsätze) über nativen Speichern-Dialog
+│   │   ├── export-report.js      # Electron-I/O für den CSV-Export (Speichern-Dialog + Datei schreiben)
+│   │   ├── report-formatter.js   # Reine CSV-Formatierungslogik, unabhängig von Electron (getestet)
 │   │   ├── api-client.js         # HTTP-Client für die offizielle LSS-API
-│   │   └── aao-engine.js         # Regelbasierte AAO-Vorschlagslogik (rein lesend)
+│   │   └── aao-engine.js         # Regelbasierte AAO-Vorschlagslogik (rein lesend, getestet)
 │   ├── renderer/
 │   │   ├── index.html            # Dashboard-UI (Übersicht, Fahrzeuge, AAO, Einstellungen)
 │   │   ├── styles/dashboard.css  # Dark-Mode-Theme
@@ -43,6 +46,10 @@ desktop-app/
 │   └── shared/
 │       ├── constants.js          # IPC-Kanalnamen, Game-URL, DOM-Selektoren (single source of truth)
 │       └── aao-rules.json        # Konfigurierbares AAO-Regelwerk (Einsatzart -> Fahrzeugtypen)
+├── test/                          # node --test - siehe Abschnitt 9
+│   ├── aao-engine.test.js
+│   ├── game-data-hub.test.js
+│   └── report-formatter.test.js
 ├── installer/
 │   ├── install.bat / uninstall.bat
 │   └── create-shortcut.ps1
@@ -151,6 +158,20 @@ aus Abschnitt 1.
   Umlaute korrekt anzeigt statt sie als Kauderwelsch zu interpretieren.
 - Alle vier Features hängen an `game-data-hub.onPublish()` bzw. eigenen
   IPC-Handlern und benötigen keine zusätzlichen npm-Abhängigkeiten.
+- **Fensterzustand merken** (`window-state.js`): Größe/Position werden beim
+  Verschieben/Resizen debounced (500ms) nach `<userData>/window-state.json`
+  geschrieben und beim nächsten Start wiederhergestellt. Liegt die gespeicherte
+  Position außerhalb aller aktuell angeschlossenen Bildschirme (z. B. nach dem
+  Abstecken eines externen Monitors), wird auf die Standardgröße/-position
+  zurückgefallen, statt ein unerreichbares Fenster zu öffnen.
+- **Verbindungsstatus sichtbar machen** (`ipc.js`/`game-data-hub.js`): Schlägt
+  das API-Polling fehl, meldet `ipc.js` das über den neuen `poll:status`-Kanal
+  an den Renderer - dieser zeigt ein rotes Banner plus Toast
+  ("Verbindung zur API fehlgeschlagen") an. Nur die *erste* Fehlermeldung
+  einer Fehlerserie wird gesendet (kein Flackern alle 20s); bei Erfolg nach
+  einer Fehlerserie erscheint einmalig "Verbindung wiederhergestellt". Vorher
+  verschwanden Polling-Fehler stillschweigend im Log, ohne dass der Nutzer es
+  bemerkt hätte.
 
 ## 8. Verwandter Branch: Tampermonkey-Bridge
 
@@ -159,3 +180,23 @@ alternative Datenquelle: ein Tampermonkey-Userscript, das im normalen,
 bereits eingeloggten Browser des Spielers läuft und die Daten lokal an eine
 zusätzliche HTTP-Schnittstelle dieser App sendet – ohne eingebettetes
 Login-Fenster. Details dort in `ARCHITECTURE.md`, Abschnitt 6-8.
+
+## 9. Tests
+
+`npm test` führt `node --test` aus (Node.js' eingebauter Test-Runner, keine
+zusätzliche Abhängigkeit). Getestet wird ausschließlich reine Logik, die ohne
+laufendes Electron auskommt:
+
+- `test/aao-engine.test.js` – AAO-Vorschlagslogik: fehlende Fahrzeugtypen,
+  vollständige Alarmierbarkeit, `fms_status`-Filterung, Reservierung über
+  mehrere Einsätze hinweg, Fallback-Regel.
+- `test/game-data-hub.test.js` – Publish-Pfad: IPC-Kanalreihenfolge,
+  Verhalten bei zerstörtem Fenster, `onPublish()`-Abonnements inkl.
+  Fehlerisolation zwischen Listenern, `getLastSnapshot()`.
+- `test/report-formatter.test.js` – CSV-Escaping (Semikolons, Anführungszeichen,
+  Zeilenumbrüche), Berichtsinhalt inkl. BOM, Dateinamensformat.
+
+Module mit direkter Electron-Abhängigkeit (`ipc.js`, `windows.js`, `tray.js`,
+`main.js`, `secure-store.js`, …) sind bewusst nicht unit-getestet - dafür
+bräuchte es einen laufenden Electron-Prozess (z. B. über Playwrights
+Electron-Unterstützung); das bleibt manuellem/End-to-End-Testen vorbehalten.

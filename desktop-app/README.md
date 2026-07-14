@@ -30,6 +30,13 @@ npm install
 npm start
 ```
 
+Tests laufen ohne zusätzliche Abhängigkeiten über Node.js' eingebauten
+Test-Runner:
+
+```bash
+npm test
+```
+
 ### Verbindung zum Spiel herstellen
 
 Unter **Einstellungen** den persönlichen API-Bearer-Token hinterlegen
@@ -55,6 +62,9 @@ aber nur eine Sichtansicht, kein Datenweg.
 - **Bericht exportieren** (Fahrzeuge-Ansicht): speichert Fahrzeuge und
   Einsätze als CSV-Datei über einen nativen Speichern-Dialog.
 - **Sortierbare Fahrzeugtabelle**: Spaltenüberschriften anklicken zum Sortieren.
+- **Fenstergröße/-position merken**: wird beim nächsten Start automatisch wiederhergestellt.
+- **Verbindungsstatus sichtbar**: Schlägt das API-Polling fehl, erscheint ein
+  deutliches Banner statt eines stillen Fehlers im Log.
 
 ## Build (Windows-Installer/Portable)
 

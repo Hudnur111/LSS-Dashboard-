@@ -18,6 +18,7 @@ const CHANNELS = {
     GAME_DATA: 'game:data',
     AAO_SUGGESTIONS: 'aao:suggestions',
     VEHICLE_UPDATE: 'vehicle:update',
+    POLL_STATUS: 'poll:status',
   },
 };
 
@@ -39,6 +40,7 @@ contextBridge.exposeInMainWorld('lssAPI', {
   onGameData: (cb) => on(CHANNELS.TO_RENDERER.GAME_DATA, cb),
   onAaoSuggestions: (cb) => on(CHANNELS.TO_RENDERER.AAO_SUGGESTIONS, cb),
   onVehicleUpdate: (cb) => on(CHANNELS.TO_RENDERER.VEHICLE_UPDATE, cb),
+  onPollStatus: (cb) => on(CHANNELS.TO_RENDERER.POLL_STATUS, cb),
 
   getSettings: () => ipcRenderer.invoke(CHANNELS.SETTINGS_GET),
   setApiToken: (token) => ipcRenderer.invoke(CHANNELS.TOKEN_SET, token),

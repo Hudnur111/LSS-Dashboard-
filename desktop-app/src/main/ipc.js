@@ -9,6 +9,12 @@ const hub = require('./game-data-hub');
 
 const POLL_INTERVAL_MS = 20_000;
 let pollTimer = null;
+let consecutiveFailures = 0;
+
+function sendPollStatus(dashboardWindow, status) {
+  if (!dashboardWindow || dashboardWindow.isDestroyed()) return;
+  dashboardWindow.webContents.send(CHANNELS.TO_RENDERER.POLL_STATUS, status);
+}
 
 async function pollOnce(dashboardWindow) {
   const token = secureStore.getToken();
@@ -16,14 +22,25 @@ async function pollOnce(dashboardWindow) {
 
   try {
     const [vehicles, missions] = await Promise.all([fetchVehicles(token), fetchMissions(token)]);
+    // Only announce recovery if we'd actually told the renderer about a
+    // failure before - a silent success every 20s would be pointless noise.
+    if (consecutiveFailures > 0) sendPollStatus(dashboardWindow, { ok: true });
+    consecutiveFailures = 0;
     hub.publish(dashboardWindow, { vehicles, missions });
   } catch (err) {
+    consecutiveFailures += 1;
     console.error('[lss-dashboard] Polling fehlgeschlagen:', err.message);
+    // Report only the first failure in a streak, not every retry - the
+    // banner should appear once and clear once, not flicker every 20s.
+    if (consecutiveFailures === 1) {
+      sendPollStatus(dashboardWindow, { ok: false, message: err.message });
+    }
   }
 }
 
 function startPolling(dashboardWindow) {
   stopPolling();
+  consecutiveFailures = 0;
   pollOnce(dashboardWindow);
   pollTimer = setInterval(() => pollOnce(dashboardWindow), POLL_INTERVAL_MS);
 }
@@ -31,6 +48,7 @@ function startPolling(dashboardWindow) {
 function stopPolling() {
   if (pollTimer) clearInterval(pollTimer);
   pollTimer = null;
+  consecutiveFailures = 0;
 }
 
 function registerIpcHandlers(dashboardWindow) {

@@ -34,6 +34,7 @@ module.exports = {
       GAME_DATA: 'game:data',
       AAO_SUGGESTIONS: 'aao:suggestions',
       VEHICLE_UPDATE: 'vehicle:update',
+      POLL_STATUS: 'poll:status',
     },
   },
 };

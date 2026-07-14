@@ -3,13 +3,18 @@
 const path = require('path');
 const { BrowserWindow, BrowserView } = require('electron');
 const { GAME_URL, GAME_SESSION_PARTITION } = require('../shared/constants');
+const { loadWindowState, trackWindowState } = require('./window-state');
 
 const SIDEBAR_WIDTH = 420;
 
 function createDashboardWindow() {
+  const savedState = loadWindowState();
+
   const win = new BrowserWindow({
-    width: 1440,
-    height: 900,
+    x: savedState.x,
+    y: savedState.y,
+    width: savedState.width,
+    height: savedState.height,
     minWidth: 1100,
     minHeight: 700,
     backgroundColor: '#0f1115',
@@ -21,6 +26,9 @@ function createDashboardWindow() {
       nodeIntegration: false,
     },
   });
+
+  if (savedState.maximized) win.maximize();
+  trackWindowState(win);
 
   win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
 

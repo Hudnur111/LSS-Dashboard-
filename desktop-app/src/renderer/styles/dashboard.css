@@ -132,6 +132,20 @@ nav {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  animation: banner-slide-down 0.3s ease;
+}
+
 .ghost-btn, .danger-btn, #saveTokenBtn, #loadDemoBtn {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
