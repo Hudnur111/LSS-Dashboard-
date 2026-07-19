@@ -220,8 +220,12 @@ function setupNavigation() {
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach((btn) => {
     btn.addEventListener('click', () => {
-      navItems.forEach((b) => b.classList.remove('active'));
+      navItems.forEach((b) => {
+        b.classList.remove('active');
+        b.removeAttribute('aria-current');
+      });
       btn.classList.add('active');
+      btn.setAttribute('aria-current', 'page');
       document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
       const view = qs(`view-${btn.dataset.view}`);
       view.classList.remove('hidden');
@@ -253,6 +257,11 @@ async function setupSettings() {
     await window.lssAPI.clearApiToken();
     qs('tokenInput').placeholder = 'Bearer-Token aus den Leitstellenspiel-Entwicklereinstellungen';
     showToast('API-Token entfernt.');
+    // Without this, the dashboard would keep showing the last real data
+    // frozen in place forever, with no indication it's now stale - falling
+    // back to demo data makes "no connection" visually obvious again, just
+    // like on first launch.
+    loadDemoData({ silent: true });
   });
 
   return settings;

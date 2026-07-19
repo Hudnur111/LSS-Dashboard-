@@ -12,6 +12,13 @@
 
 * { box-sizing: border-box; }
 
+/* Dark backgrounds swallow the browser's default focus ring - make sure
+   keyboard navigation stays visible without relying on hover-only cues. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }

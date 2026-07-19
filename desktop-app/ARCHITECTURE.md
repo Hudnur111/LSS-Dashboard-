@@ -37,7 +37,8 @@ desktop-app/
 │   │   ├── notifier.js           # Native OS-Benachrichtigungen bei neuen Einsätzen (nur wenn Fenster unfokussiert)
 │   │   ├── export-report.js      # Electron-I/O für den CSV-Export (Speichern-Dialog + Datei schreiben)
 │   │   ├── report-formatter.js   # Reine CSV-Formatierungslogik, unabhängig von Electron (getestet)
-│   │   ├── api-client.js         # HTTP-Client für die offizielle LSS-API
+│   │   ├── api-client.js         # HTTP-Client für die offizielle LSS-API (10s-Timeout, getestet)
+│   │   ├── poll-backoff.js       # Reine Backoff-Berechnung fürs Polling-Intervall (getestet)
 │   │   └── aao-engine.js         # Regelbasierte AAO-Vorschlagslogik (rein lesend, getestet)
 │   ├── renderer/
 │   │   ├── index.html            # Dashboard-UI (Übersicht, Fahrzeuge, AAO, Einstellungen)
@@ -126,6 +127,10 @@ ohne zusätzliche Abhängigkeiten:
   Skeleton-Loading-Zustand, bis die erste Datenlieferung eintrifft.
 - Reine CSS-Animationen für View-Wechsel, Karten-Hover –
   alle über `prefers-reduced-motion` deaktivierbar (Barrierefreiheit).
+- **Barrierefreiheit**: sichtbarer `:focus-visible`-Ring in Akzentfarbe (der
+  dunkle Hintergrund verschluckt sonst den Standard-Fokusring der meisten
+  Browser), `aria-current="page"` auf dem aktiven Navigationspunkt,
+  `aria-live="polite"` auf dem Toast-Container.
 
 Bewusst nicht verwendet: keine Chart-/Animation-Bibliothek, kein CSS-Framework
 – konsistent mit der "keine CDN-Skripte, minimale Abhängigkeiten"-Entscheidung
@@ -195,8 +200,40 @@ laufendes Electron auskommt:
   Fehlerisolation zwischen Listenern, `getLastSnapshot()`.
 - `test/report-formatter.test.js` – CSV-Escaping (Semikolons, Anführungszeichen,
   Zeilenumbrüche), Berichtsinhalt inkl. BOM, Dateinamensformat.
+- `test/api-client.test.js` – HTTP-Client gegen einen gemockten `global.fetch`:
+  Erfolgsfall, HTTP-Fehlerstatus, Timeout/Abort-Übersetzung, sonstige
+  Netzwerkfehler.
+- `test/poll-backoff.test.js` – Backoff-Berechnung: Basisintervall,
+  Verdopplung pro Fehlversuch, Deckelung bei 5 Minuten.
 
 Module mit direkter Electron-Abhängigkeit (`ipc.js`, `windows.js`, `tray.js`,
 `main.js`, `secure-store.js`, …) sind bewusst nicht unit-getestet - dafür
 bräuchte es einen laufenden Electron-Prozess (z. B. über Playwrights
 Electron-Unterstützung); das bleibt manuellem/End-to-End-Testen vorbehalten.
+Reine Logik, die diese Module benötigen (CSV-Formatierung, Backoff-Berechnung),
+wird deshalb konsequent in eigene, Electron-freie Module ausgelagert
+(`report-formatter.js`, `poll-backoff.js`) statt in den Electron-Wrappern
+selbst zu leben - das hält sie testbar, auch wenn `electron` gerade nicht
+installiert ist.
+
+Eine GitHub-Actions-Pipeline (`.github/workflows/test.yml`) führt `npm test`
+bei jedem Push/PR auf `main`, `dashboard` und `tampermonkey` automatisch aus.
+
+## 10. Resilienz: Netzwerk-Timeout und Backoff
+
+- `api-client.js`: Jede API-Anfrage hat ein 10-Sekunden-Timeout
+  (`AbortController`). Ohne das könnte eine hängende Verbindung
+  `pollOnce()` unbegrenzt blockieren, da `ipc.js` beide Anfragen abwartet,
+  bevor der nächste Poll geplant wird - ein einziger hängender Request hätte
+  sonst das gesamte weitere Polling lautlos gestoppt.
+- `poll-backoff.js`: Nach wiederholten Fehlschlägen verdoppelt sich das
+  Poll-Intervall (20s → 40s → 80s → … ), gedeckelt bei 5 Minuten, statt eine
+  erkennbar down API alle 20s weiter anzufragen. `ipc.js` plant den nächsten
+  Poll deshalb über eine sich selbst neu terminierende `setTimeout`-Kette
+  statt eines festen `setInterval`.
+- `ipc.js` (`TOKEN_CLEAR`-Handler): Entfernt der Nutzer den API-Token, wird
+  zusätzlich ein `poll:status`-Erfolgssignal gesendet, das ein eventuell noch
+  sichtbares Fehler-Banner löscht - sonst hätte "Verbindung fehlgeschlagen"
+  weiter angezeigt, obwohl gar kein Polling mehr läuft. Der Renderer lädt in
+  diesem Fall zusätzlich wieder die Demo-Daten (`dashboard.js`), statt die
+  zuletzt bekannten echten Daten eingefroren stehen zu lassen.

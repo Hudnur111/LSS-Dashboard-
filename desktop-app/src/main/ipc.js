@@ -6,8 +6,8 @@ const secureStore = require('./secure-store');
 const { fetchVehicles, fetchMissions } = require('./api-client');
 const { exportReport } = require('./export-report');
 const hub = require('./game-data-hub');
+const { computeNextDelayMs } = require('./poll-backoff');
 
-const POLL_INTERVAL_MS = 20_000;
 let pollTimer = null;
 let consecutiveFailures = 0;
 
@@ -38,15 +38,22 @@ async function pollOnce(dashboardWindow) {
   }
 }
 
+function scheduleNextPoll(dashboardWindow) {
+  clearTimeout(pollTimer);
+  pollTimer = setTimeout(async () => {
+    await pollOnce(dashboardWindow);
+    scheduleNextPoll(dashboardWindow);
+  }, computeNextDelayMs(consecutiveFailures));
+}
+
 function startPolling(dashboardWindow) {
   stopPolling();
   consecutiveFailures = 0;
-  pollOnce(dashboardWindow);
-  pollTimer = setInterval(() => pollOnce(dashboardWindow), POLL_INTERVAL_MS);
+  pollOnce(dashboardWindow).then(() => scheduleNextPoll(dashboardWindow));
 }
 
 function stopPolling() {
-  if (pollTimer) clearInterval(pollTimer);
+  clearTimeout(pollTimer);
   pollTimer = null;
   consecutiveFailures = 0;
 }
@@ -79,6 +86,10 @@ function registerIpcHandlers(dashboardWindow) {
   ipcMain.handle(CHANNELS.TOKEN_CLEAR, async () => {
     secureStore.clearToken();
     stopPolling();
+    // Clears any error banner left over from a previous failing connection -
+    // otherwise "Verbindung fehlgeschlagen" would linger even though polling
+    // has stopped entirely, which reads as a connection that's still broken.
+    sendPollStatus(dashboardWindow, { ok: true });
     return { ok: true };
   });
 

@@ -1,5 +1,7 @@
 # LSS Dashboard – Desktop-App (Electron)
 
+[![Tests](https://github.com/Hudnur111/LSS-Dashboard-/actions/workflows/test.yml/badge.svg?branch=dashboard)](https://github.com/Hudnur111/LSS-Dashboard-/actions/workflows/test.yml)
+
 Electron-Desktop-Erweiterung für das Browsergame [Leitstellenspiel](https://www.leitstellenspiel.de/):
 Dark-Mode-Dashboard mit Fahrzeug-Status, Einsatz-Monitoring, AAO-Alarmierungsvorschlägen,
 Demo-Modus, System-Tray-Integration mit nativen Benachrichtigungen, CSV-Berichtsexport,
@@ -64,7 +66,9 @@ aber nur eine Sichtansicht, kein Datenweg.
 - **Sortierbare Fahrzeugtabelle**: Spaltenüberschriften anklicken zum Sortieren.
 - **Fenstergröße/-position merken**: wird beim nächsten Start automatisch wiederhergestellt.
 - **Verbindungsstatus sichtbar**: Schlägt das API-Polling fehl, erscheint ein
-  deutliches Banner statt eines stillen Fehlers im Log.
+  deutliches Banner statt eines stillen Fehlers im Log. Bei anhaltenden
+  Fehlern verlangsamt sich das Polling automatisch (bis auf 5 Minuten), statt
+  eine erkennbar down API weiter im 20s-Takt anzufragen.
 
 ## Build (Windows-Installer/Portable)
 
